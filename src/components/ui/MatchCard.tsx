@@ -1,17 +1,21 @@
+import { motion } from 'framer-motion'
 import type { Match } from '../../types/football'
 import TeamCrest from './TeamCrest'
 import LiveIndicator from './LiveIndicator'
 
+const cardTransition = { duration: 0.18, ease: [0.2, 0, 0, 1] as const }
+
 /**
- * MatchCard — the core visual unit of BIG5 (design brief section 4).
- * Three-zone layout: status row on top, then home crest+name / score / away crest+name.
- * Handles all three states: upcoming (kickoff time), live (pulsing indicator),
- * finished (muted FT, winner brightened).
+ * MatchCard — the core visual unit of BIG5.
+ * Now animated with framer-motion: cards fade/rise in on mount, and
+ * compress slightly on press — small, deliberate motion per our
+ * design system's "broadcast energy" spec (snappy, never slow fades).
  */
 function MatchCard({ match }: { match: Match }) {
     const { status, kickoff, minute, homeTeam, awayTeam, homeScore, awayScore } = match
 
     const isFinished = status === 'finished'
+    const isUpcoming = status === 'upcoming'
     const homeWon = isFinished && homeScore !== null && awayScore !== null && homeScore > awayScore
     const awayWon = isFinished && homeScore !== null && awayScore !== null && awayScore > homeScore
 
@@ -21,15 +25,16 @@ function MatchCard({ match }: { match: Match }) {
     })
 
     return (
-        <div className="rounded-2xl border border-border bg-surface-1 p-4">
-            {/* Status row */}
-            <div className="mb-3 flex items-center justify-center">
+        <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileTap={{ scale: 0.98 }}
+            transition={cardTransition}
+            className="rounded-2xl border border-border bg-surface-1 p-4"
+        >
+            {/* Status row — fixed height so upcoming cards don't shrink vs live/finished */}
+            <div className="mb-3 flex h-5 items-center justify-center">
                 {status === 'live' && <LiveIndicator minute={minute} />}
-                {status === 'upcoming' && (
-                    <span className="text-xs font-semibold uppercase tracking-wide text-text-2 [font-variant-numeric:tabular-nums]">
-                        {kickoffTime}
-                    </span>
-                )}
                 {status === 'finished' && (
                     <span className="text-xs font-semibold uppercase tracking-wide text-text-3">
                         FT
@@ -37,7 +42,7 @@ function MatchCard({ match }: { match: Match }) {
                 )}
             </div>
 
-            {/* Teams + score */}
+            {/* Teams + score/kickoff */}
             <div className="flex items-center justify-between gap-3">
                 <div className="flex flex-1 items-center gap-2">
                     <TeamCrest team={homeTeam} />
@@ -49,10 +54,16 @@ function MatchCard({ match }: { match: Match }) {
                     </span>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-2 font-display text-3xl font-extrabold text-text [font-variant-numeric:tabular-nums]">
-                    <span>{homeScore ?? '–'}</span>
-                    <span className="text-text-3">:</span>
-                    <span>{awayScore ?? '–'}</span>
+                <div className="flex shrink-0 items-center justify-center [font-variant-numeric:tabular-nums]">
+                    {isUpcoming ? (
+                        <span className="text-base font-semibold text-text-2">{kickoffTime}</span>
+                    ) : (
+                        <div className="flex items-center gap-2 font-display text-3xl font-extrabold text-text">
+                            <span>{homeScore}</span>
+                            <span className="text-text-3">:</span>
+                            <span>{awayScore}</span>
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex flex-1 items-center justify-end gap-2">
@@ -65,7 +76,7 @@ function MatchCard({ match }: { match: Match }) {
                     <TeamCrest team={awayTeam} />
                 </div>
             </div>
-        </div>
+        </motion.div>
     )
 }
 
