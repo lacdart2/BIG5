@@ -1,10 +1,8 @@
 import type { Match, MatchStatus, Team } from '../types/football'
+import { LEAGUES } from '../types/league'
 
-
-// football-data.org's competition codes for our 5 leagues.
 const BIG5_CODES = ['PL', 'PD', 'SA', 'BL1', 'FL1']
 
-/** Maps BIG5's UI league IDs to football-data.org competition codes. */
 export const STANDINGS_CODES: Record<string, string> = {
     pl: 'PL',
     laliga: 'PD',
@@ -13,7 +11,10 @@ export const STANDINGS_CODES: Record<string, string> = {
     ligue1: 'FL1',
 }
 
-/** A league table row using the provider's official position and totals. */
+const CODE_TO_CANONICAL_ID: Record<string, number> = Object.fromEntries(
+    LEAGUES.map((league) => [STANDINGS_CODES[league.id], league.apiId])
+)
+
 export interface Standing {
     position: number
     team: Team
@@ -44,7 +45,7 @@ interface ScheduleApiMatch {
     id: number
     utcDate: string
     status: string
-    competition: { id: number; name: string }
+    competition: { id: number; name: string; code: string }
     homeTeam: { id: number; name: string; shortName: string | null; crest: string | null }
     awayTeam: { id: number; name: string; shortName: string | null; crest: string | null }
     score: {
@@ -55,11 +56,10 @@ interface ScheduleApiMatch {
 const LIVE_STATUSES = ['IN_PLAY', 'PAUSED', 'EXTRA_TIME', 'PENALTY_SHOOTOUT']
 const FINISHED_STATUSES = ['FINISHED', 'AWARDED']
 
-/** Maps football-data.org's status enum to our 3 simple states. */
 function mapStatus(status: string): MatchStatus {
     if (LIVE_STATUSES.includes(status)) return 'live'
     if (FINISHED_STATUSES.includes(status)) return 'finished'
-    return 'upcoming' // SCHEDULED, TIMED, POSTPONED, SUSPENDED, CANCELLED
+    return 'upcoming'
 }
 
 function mapMatch(m: ScheduleApiMatch): Match {
@@ -82,26 +82,40 @@ function mapMatch(m: ScheduleApiMatch): Match {
         homeScore: m.score.fullTime.home,
         awayScore: m.score.fullTime.away,
         competition: m.competition.name,
-        leagueApiId: m.competition.id,
+        leagueApiId: CODE_TO_CANONICAL_ID[m.competition.code] ?? m.competition.id,
     }
 }
 
-/**
- * Fetches all Big 5 fixtures for the next 7 days in ONE request —
- * football-data.org supports real date-range + multi-competition
- * filtering on the free tier, unlike API-Football. Used by Week only:
- * scores here are delayed, not real-time, which is fine for schedule
- * browsing but wrong for live data (Today/Live stay on API-Football).
- */
-export async function fetchWeekFixtures(): Promise<Match[]> {
-    const today = new Date()
-    const in7Days = new Date()
-    in7Days.setDate(today.getDate() + 7)
+// ── Short-lived request cache ────────────────────────────────────────
+// football-data.org's free tier allows only 10 requests/minute. Dev
+// testing (especially React StrictMode's intentional double-effect-fire)
+// can burn through that instantly. This cache is a DEV SAFEGUARD only —
+// production caching is Supabase's job later (MVP 0.6).
+const CACHE_TTL_MS = 2 * 60 * 1000 // 2 minutes
 
-    const dateFrom = today.toISOString().slice(0, 10)
-    const dateTo = in7Days.toISOString().slice(0, 10)
+function getCached<T>(key: string): T | null {
+    try {
+        const raw = sessionStorage.getItem(key)
+        if (!raw) return null
+        const { timestamp, data } = JSON.parse(raw)
+        if (Date.now() - timestamp > CACHE_TTL_MS) return null
+        return data as T
+    } catch {
+        return null
+    }
+}
 
-    const url = `/schedule-api/matches?dateFrom=${dateFrom}&dateTo=${dateTo}&competitions=${BIG5_CODES.join(',')}`
+function setCached(key: string, data: unknown) {
+    try {
+        sessionStorage.setItem(key, JSON.stringify({ timestamp: Date.now(), data }))
+    } catch {
+        // sessionStorage full or unavailable — fail silently, just skip caching
+    }
+}
+
+async function cachedFetch<T>(url: string, transform: (data: unknown) => T): Promise<T> {
+    const cached = getCached<T>(url)
+    if (cached) return cached
 
     const response = await fetch(url)
 
@@ -110,35 +124,56 @@ export async function fetchWeekFixtures(): Promise<Match[]> {
     }
 
     const data = await response.json()
-    const matches: ScheduleApiMatch[] = data.matches ?? []
+    const result = transform(data)
+    setCached(url, result)
+    return result
+}
+// ──────────────────────────────────────────────────────────────────────
 
-    return matches.map(mapMatch)
+async function fetchMatchesByDateRange(dateFrom: string, dateTo: string): Promise<Match[]> {
+    const url = `/schedule-api/matches?dateFrom=${dateFrom}&dateTo=${dateTo}&competitions=${BIG5_CODES.join(',')}`
+
+    return cachedFetch(url, (data) => {
+        const matches: ScheduleApiMatch[] = (data as { matches?: ScheduleApiMatch[] }).matches ?? []
+        return matches.map(mapMatch)
+    })
 }
 
-/** Fetches a competition's overall standings through the existing Vite proxy. */
+export function fetchWeekFixtures(): Promise<Match[]> {
+    const today = new Date()
+    const in7Days = new Date()
+    in7Days.setDate(today.getDate() + 7)
+
+    const dateFrom = today.toISOString().slice(0, 10)
+    const dateTo = in7Days.toISOString().slice(0, 10)
+
+    return fetchMatchesByDateRange(dateFrom, dateTo)
+}
+
+export function fetchTodayFixturesFallback(): Promise<Match[]> {
+    const today = new Date().toISOString().slice(0, 10)
+    return fetchMatchesByDateRange(today, today)
+}
+
 export async function fetchStandings(competitionCode: string): Promise<Standing[]> {
-    const response = await fetch(`/schedule-api/competitions/${competitionCode}/standings`)
+    const url = `/schedule-api/competitions/${competitionCode}/standings`
 
-    if (!response.ok) {
-        throw new Error(`Schedule API error: ${response.status}`)
-    }
-
-    const data: StandingsResponse = await response.json()
-    const table = data.standings?.[0]?.table ?? []
-
-    return table.map((row) => ({
-        position: row.position,
-        team: {
-            id: String(row.team.id),
-            name: row.team.name,
-            shortName: row.team.tla ?? row.team.name,
-            crestUrl: row.team.crest ?? undefined,
-        },
-        played: row.playedGames,
-        won: row.won,
-        drawn: row.draw,
-        lost: row.lost,
-        goalDifference: row.goalDifference,
-        points: row.points,
-    }))
+    return cachedFetch(url, (data) => {
+        const table = (data as StandingsResponse).standings?.[0]?.table ?? []
+        return table.map((row) => ({
+            position: row.position,
+            team: {
+                id: String(row.team.id),
+                name: row.team.name,
+                shortName: row.team.tla ?? row.team.name,
+                crestUrl: row.team.crest ?? undefined,
+            },
+            played: row.playedGames,
+            won: row.won,
+            drawn: row.draw,
+            lost: row.lost,
+            goalDifference: row.goalDifference,
+            points: row.points,
+        }))
+    })
 }

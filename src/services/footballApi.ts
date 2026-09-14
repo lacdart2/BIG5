@@ -4,7 +4,8 @@ import { LEAGUES } from '../types/league'
 const API_KEY = import.meta.env.VITE_FOOTBALL_API_KEY
 const BASE_URL = import.meta.env.VITE_FOOTBALL_API_BASE_URL
 
-/** Raw shape of one fixture object from API-Football's /fixtures response. */
+export class FootballApiError extends Error { }
+
 interface ApiFixture {
     fixture: {
         id: number
@@ -22,14 +23,12 @@ interface ApiFixture {
 const LIVE_CODES = ['1H', 'HT', '2H', 'ET', 'BT', 'P', 'SUSP', 'INT', 'LIVE']
 const FINISHED_CODES = ['FT', 'AET', 'PEN', 'PST', 'CANC', 'ABD', 'AWD', 'WO']
 
-/** Maps API-Football's many status codes down to our 3 simple states. */
 function mapStatus(short: string): MatchStatus {
     if (LIVE_CODES.includes(short)) return 'live'
     if (FINISHED_CODES.includes(short)) return 'finished'
-    return 'upcoming' // covers "NS" (not started), "TBD", etc.
+    return 'upcoming'
 }
 
-/** Converts one raw API fixture into our app's Match shape. */
 function mapFixtureToMatch(f: ApiFixture): Match {
     return {
         id: String(f.fixture.id),
@@ -55,25 +54,37 @@ function mapFixtureToMatch(f: ApiFixture): Match {
     }
 }
 
-/**
- * Fetches all fixtures for one date ("YYYY-MM-DD"), filtered down to our
- * 5 supported leagues. NOTE: the free plan only allows dates within a
- * ~3-day window (yesterday/today/tomorrow) — confirmed via testing.
- * Requesting outside that window returns a data.errors.plan message.
- */
+/** True if API-Football's `errors` field indicates a real failure.
+ * API-Football returns `errors: []` (empty array) on success, but an
+ * object with ANY key (plan, rateLimit, requests, token, etc.) on
+ * failure — so we check generically instead of naming each key, since
+ * they've already used at least 3 different names for "quota exceeded". */
+function hasApiError(errors: unknown): boolean {
+    if (Array.isArray(errors)) return errors.length > 0
+    if (errors && typeof errors === 'object') return Object.keys(errors).length > 0
+    return false
+}
+
+function extractErrorMessage(errors: unknown): string {
+    if (errors && typeof errors === 'object' && !Array.isArray(errors)) {
+        return Object.values(errors).join(', ')
+    }
+    return 'API-Football error'
+}
+
 export async function fetchFixturesByDate(date: string): Promise<Match[]> {
     const response = await fetch(`${BASE_URL}/fixtures?date=${date}`, {
         headers: { 'x-apisports-key': API_KEY },
     })
 
     if (!response.ok) {
-        throw new Error(`Football API error: ${response.status}`)
+        throw new FootballApiError(`Football API error: ${response.status}`)
     }
 
     const data = await response.json()
 
-    if (data.errors?.plan) {
-        throw new Error(data.errors.plan)
+    if (hasApiError(data.errors)) {
+        throw new FootballApiError(extractErrorMessage(data.errors))
     }
 
     const apiFixtures: ApiFixture[] = data.response ?? []
@@ -84,7 +95,6 @@ export async function fetchFixturesByDate(date: string): Promise<Match[]> {
         .map(mapFixtureToMatch)
 }
 
-/** Convenience wrapper — today's fixtures specifically. Used by Today and Live pages. */
 export function fetchTodayFixtures(): Promise<Match[]> {
     const today = new Date().toISOString().slice(0, 10)
     return fetchFixturesByDate(today)

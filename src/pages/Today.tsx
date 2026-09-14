@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import MatchCard from '../components/ui/MatchCard'
 import LeagueTabs from '../components/layout/LeagueTabs'
-import { fetchTodayFixtures } from '../services/footballApi'
+import { fetchTodayFixturesWithFallback } from '../services/fixturesService'
 import { LEAGUES } from '../types/league'
 import type { Match } from '../types/football'
 
@@ -9,11 +9,15 @@ function Today() {
     const [matches, setMatches] = useState<Match[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [usedFallback, setUsedFallback] = useState(false)
     const [activeLeagueId, setActiveLeagueId] = useState('all')
 
     useEffect(() => {
-        fetchTodayFixtures()
-            .then(setMatches)
+        fetchTodayFixturesWithFallback()
+            .then(({ matches, usedFallback }) => {
+                setMatches(matches)
+                setUsedFallback(usedFallback)
+            })
             .catch(() => setError('Could not load matches. Please try again.'))
             .finally(() => setIsLoading(false))
     }, [])
@@ -29,6 +33,10 @@ function Today() {
     return (
         <div className="flex flex-col">
             <LeagueTabs activeId={activeLeagueId} onChange={setActiveLeagueId} />
+
+            {usedFallback && !isLoading && !error && (
+                <p className="px-4 pb-2 text-[11px] text-text-3">Data may be delayed</p>
+            )}
 
             <div className="flex flex-col gap-3 px-4 pb-4">
                 {isLoading && (
