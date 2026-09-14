@@ -1,8 +1,44 @@
-import type { Match, MatchStatus } from '../types/football'
+import type { Match, MatchStatus, Team } from '../types/football'
 
 
 // football-data.org's competition codes for our 5 leagues.
 const BIG5_CODES = ['PL', 'PD', 'SA', 'BL1', 'FL1']
+
+/** Maps BIG5's UI league IDs to football-data.org competition codes. */
+export const STANDINGS_CODES: Record<string, string> = {
+    pl: 'PL',
+    laliga: 'PD',
+    seriea: 'SA',
+    bundesliga: 'BL1',
+    ligue1: 'FL1',
+}
+
+/** A league table row using the provider's official position and totals. */
+export interface Standing {
+    position: number
+    team: Team
+    played: number
+    won: number
+    drawn: number
+    lost: number
+    goalDifference: number
+    points: number
+}
+
+interface ScheduleApiStanding {
+    position: number
+    team: { id: number; name: string; tla: string | null; crest: string | null }
+    playedGames: number
+    won: number
+    draw: number
+    lost: number
+    goalDifference: number
+    points: number
+}
+
+interface StandingsResponse {
+    standings?: { table: ScheduleApiStanding[] }[]
+}
 
 interface ScheduleApiMatch {
     id: number
@@ -77,4 +113,32 @@ export async function fetchWeekFixtures(): Promise<Match[]> {
     const matches: ScheduleApiMatch[] = data.matches ?? []
 
     return matches.map(mapMatch)
+}
+
+/** Fetches a competition's overall standings through the existing Vite proxy. */
+export async function fetchStandings(competitionCode: string): Promise<Standing[]> {
+    const response = await fetch(`/schedule-api/competitions/${competitionCode}/standings`)
+
+    if (!response.ok) {
+        throw new Error(`Schedule API error: ${response.status}`)
+    }
+
+    const data: StandingsResponse = await response.json()
+    const table = data.standings?.[0]?.table ?? []
+
+    return table.map((row) => ({
+        position: row.position,
+        team: {
+            id: String(row.team.id),
+            name: row.team.name,
+            shortName: row.team.tla ?? row.team.name,
+            crestUrl: row.team.crest ?? undefined,
+        },
+        played: row.playedGames,
+        won: row.won,
+        drawn: row.draw,
+        lost: row.lost,
+        goalDifference: row.goalDifference,
+        points: row.points,
+    }))
 }

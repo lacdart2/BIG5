@@ -38,15 +38,17 @@ function Week() {
 
     return (
         <div className="flex flex-col">
-            <div className="flex gap-2 overflow-x-auto px-4 py-3 [scrollbar-width:none]">
+            <div role="group" aria-label="Filter by date" className="flex gap-2 overflow-x-auto px-4 py-3 [scrollbar-width:none]">
                 {WEEK_DATES.map((date, i) => {
                     const isActive = date === selectedDate
                     return (
                         <button
                             key={date}
+                            type="button"
+                            aria-pressed={isActive}
                             onClick={() => setSelectedDate(date)}
-                            className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors
-                ${isActive ? 'bg-accent/15 text-accent-text' : 'bg-surface-2 text-text-2'}`}
+                            className={`min-h-11 shrink-0 cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-text motion-reduce:transition-none
+                ${isActive ? 'bg-accent/15 text-accent-text hover:bg-accent/25 active:bg-accent/30' : 'bg-surface-2 text-text-2 hover:bg-surface-3 hover:text-text active:bg-accent/15 active:text-accent-text'}`}
                         >
                             {formatTabLabel(date, i)}
                         </button>

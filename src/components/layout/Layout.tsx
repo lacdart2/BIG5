@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import Header from './Header'
 import BottomNav from './BottomNav'
+import InstallPrompt from './InstallPrompt'
 
 /**
  * Layout — the app shell. `<Outlet />` is React Router's placeholder:
@@ -12,6 +13,7 @@ function Layout() {
     return (
         <div className="mx-auto flex min-h-dvh max-w-xl flex-col bg-bg">
             <Header />
+            <InstallPrompt />
             <main className="flex-1 pb-20">
                 <Outlet />
             </main>
