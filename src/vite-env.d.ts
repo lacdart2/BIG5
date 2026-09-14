@@ -3,6 +3,8 @@
 interface ImportMetaEnv {
     readonly VITE_FOOTBALL_API_KEY: string
     readonly VITE_FOOTBALL_API_BASE_URL: string
+    readonly VITE_SCHEDULE_API_KEY: string
+    readonly VITE_SCHEDULE_API_BASE_URL: string
 }
 
 interface ImportMeta {

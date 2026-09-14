@@ -1,15 +1,18 @@
-import { useState } from 'react'
 import { LEAGUES } from '../../types/league'
 
 /**
- * LeagueTabs — horizontal scroll pills to filter by league (design brief
- * section 6). Currently local UI state only (useState) — not yet wired to
- * actually filter matches, since real data + real league IDs arrive in
- * MVP 0.2. This is the scaffold; filtering logic hooks in later.
+ * LeagueTabs — horizontal scroll pills to filter by league.
+ * Now a "controlled component": the parent page owns which tab is
+ * active (activeId) and how it changes (onChange), so the parent
+ * can use that same selection to filter its match list.
  */
-function LeagueTabs() {
-    const [activeId, setActiveId] = useState<string>('all')
-
+function LeagueTabs({
+    activeId,
+    onChange,
+}: {
+    activeId: string
+    onChange: (id: string) => void
+}) {
     const tabs = [{ id: 'all', shortName: 'All' }, ...LEAGUES]
 
     return (
@@ -19,7 +22,7 @@ function LeagueTabs() {
                 return (
                     <button
                         key={tab.id}
-                        onClick={() => setActiveId(tab.id)}
+                        onClick={() => onChange(tab.id)}
                         className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors
               ${isActive ? 'bg-accent/15 text-accent-text' : 'bg-surface-2 text-text-2'}`}
                     >

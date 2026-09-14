@@ -51,18 +51,18 @@ function mapFixtureToMatch(f: ApiFixture): Match {
         homeScore: f.goals.home,
         awayScore: f.goals.away,
         competition: f.league.name,
+        leagueApiId: f.league.id,
     }
 }
 
 /**
- * Fetches ALL of today's fixtures worldwide in a single request, then
- * filters down to our 5 supported leagues client-side. This keeps us
- * at 1 API call instead of 5 — important on the free plan's 100/day cap.
+ * Fetches all fixtures for one date ("YYYY-MM-DD"), filtered down to our
+ * 5 supported leagues. NOTE: the free plan only allows dates within a
+ * ~3-day window (yesterday/today/tomorrow) — confirmed via testing.
+ * Requesting outside that window returns a data.errors.plan message.
  */
-export async function fetchTodayFixtures(): Promise<Match[]> {
-    const today = new Date().toISOString().slice(0, 10) // "YYYY-MM-DD"
-
-    const response = await fetch(`${BASE_URL}/fixtures?date=${today}`, {
+export async function fetchFixturesByDate(date: string): Promise<Match[]> {
+    const response = await fetch(`${BASE_URL}/fixtures?date=${date}`, {
         headers: { 'x-apisports-key': API_KEY },
     })
 
@@ -71,10 +71,21 @@ export async function fetchTodayFixtures(): Promise<Match[]> {
     }
 
     const data = await response.json()
+
+    if (data.errors?.plan) {
+        throw new Error(data.errors.plan)
+    }
+
     const apiFixtures: ApiFixture[] = data.response ?? []
     const big5Ids = new Set(LEAGUES.map((l) => l.apiId))
 
     return apiFixtures
         .filter((f) => big5Ids.has(f.league.id))
         .map(mapFixtureToMatch)
+}
+
+/** Convenience wrapper — today's fixtures specifically. Used by Today and Live pages. */
+export function fetchTodayFixtures(): Promise<Match[]> {
+    const today = new Date().toISOString().slice(0, 10)
+    return fetchFixturesByDate(today)
 }

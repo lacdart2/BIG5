@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import MatchCard from '../components/ui/MatchCard'
 import LeagueTabs from '../components/layout/LeagueTabs'
 import { fetchTodayFixtures } from '../services/footballApi'
+import { LEAGUES } from '../types/league'
 import type { Match } from '../types/football'
 
 function Today() {
     const [matches, setMatches] = useState<Match[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [activeLeagueId, setActiveLeagueId] = useState('all')
 
     useEffect(() => {
         fetchTodayFixtures()
@@ -16,9 +18,17 @@ function Today() {
             .finally(() => setIsLoading(false))
     }, [])
 
+    const visibleMatches =
+        activeLeagueId === 'all'
+            ? matches
+            : matches.filter((m) => {
+                const league = LEAGUES.find((l) => l.id === activeLeagueId)
+                return league && m.leagueApiId === league.apiId
+            })
+
     return (
         <div className="flex flex-col">
-            <LeagueTabs />
+            <LeagueTabs activeId={activeLeagueId} onChange={setActiveLeagueId} />
 
             <div className="flex flex-col gap-3 px-4 pb-4">
                 {isLoading && (
@@ -29,15 +39,15 @@ function Today() {
                     <p className="py-8 text-center text-sm text-live">{error}</p>
                 )}
 
-                {!isLoading && !error && matches.length === 0 && (
+                {!isLoading && !error && visibleMatches.length === 0 && (
                     <p className="py-8 text-center text-sm text-text-3">
-                        No Big 5 matches today.
+                        No matches for this league today.
                     </p>
                 )}
 
                 {!isLoading &&
                     !error &&
-                    matches.map((match) => <MatchCard key={match.id} match={match} />)}
+                    visibleMatches.map((match) => <MatchCard key={match.id} match={match} />)}
             </div>
         </div>
     )
