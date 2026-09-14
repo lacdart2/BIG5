@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import MatchCard from '../components/ui/MatchCard'
+import HorizontalScroller from '../components/ui/HorizontalScroller'
 import { fetchWeekFixtures } from '../services/scheduleApi'
 import type { Match } from '../types/football'
 
-/** Builds the next 7 dates starting today, e.g. ["2026-09-14", "2026-09-15", ...] */
 function getWeekDates(): string[] {
     return Array.from({ length: 7 }, (_, i) => {
         const d = new Date()
@@ -26,7 +26,6 @@ function Week() {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    // One request for the whole week — every tab switch below is free.
     useEffect(() => {
         fetchWeekFixtures()
             .then(setAllMatches)
@@ -38,7 +37,7 @@ function Week() {
 
     return (
         <div className="flex flex-col">
-            <div role="group" aria-label="Filter by date" className="flex gap-2 overflow-x-auto px-4 py-3 [scrollbar-width:none]">
+            <HorizontalScroller role="group" ariaLabel="Filter by date" className="flex gap-2 px-4 py-3">
                 {WEEK_DATES.map((date, i) => {
                     const isActive = date === selectedDate
                     return (
@@ -54,7 +53,7 @@ function Week() {
                         </button>
                     )
                 })}
-            </div>
+            </HorizontalScroller>
 
             <div className="flex flex-col gap-3 px-4 pb-4">
                 {isLoading && (

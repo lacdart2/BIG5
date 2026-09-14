@@ -1,10 +1,10 @@
 import { LEAGUES } from '../../types/league'
+import HorizontalScroller from '../ui/HorizontalScroller'
 
 /**
  * LeagueTabs — horizontal scroll pills to filter by league.
- * Now a "controlled component": the parent page owns which tab is
- * active (activeId) and how it changes (onChange), so the parent
- * can use that same selection to filter its match list.
+ * Wrapped in HorizontalScroller so users get a fade hint when
+ * tabs are cut off (e.g. Ligue 1 hidden at higher zoom levels).
  */
 function LeagueTabs({
     activeId,
@@ -13,13 +13,12 @@ function LeagueTabs({
 }: {
     activeId: string
     onChange: (id: string) => void
-    /** Hide the combined view on pages that display one league at a time. */
     showAll?: boolean
 }) {
     const tabs = showAll ? [{ id: 'all', shortName: 'All' }, ...LEAGUES] : LEAGUES
 
     return (
-        <div role="group" aria-label="Filter by league" className="flex gap-2 overflow-x-auto px-4 py-3 [scrollbar-width:none]">
+        <HorizontalScroller role="group" ariaLabel="Filter by league" className="flex gap-2 px-4 py-3">
             {tabs.map((tab) => {
                 const isActive = tab.id === activeId
                 return (
@@ -35,7 +34,7 @@ function LeagueTabs({
                     </button>
                 )
             })}
-        </div>
+        </HorizontalScroller>
     )
 }
 
