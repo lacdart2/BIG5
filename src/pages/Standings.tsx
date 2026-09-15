@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Trophy } from 'lucide-react'
+import type { TouchEvent } from 'react'
+import { motion } from 'framer-motion'
+import { ChevronLeft, ChevronRight, Trophy } from 'lucide-react'
 import LeagueTabs from '../components/layout/LeagueTabs'
 import TeamCrest from '../components/ui/TeamCrest'
 import type { Team } from '../types/football'
@@ -13,6 +15,14 @@ interface LeagueStandingsState {
     standings: Standing[]
     isLoading: boolean
     error: string | null
+}
+
+/** Capture the starting scroll position so a swipe never steals table scrolling. */
+interface LeagueSwipe {
+    x: number
+    y: number
+    canGoNext: boolean
+    canGoPrevious: boolean
 }
 
 /** Reuses the shared crest with its monogram fallback if a remote image fails. */
@@ -34,7 +44,7 @@ function LeagueStandings({ league, state }: { league: League; state: LeagueStand
 
     return (
         <section aria-labelledby={`${league.id}-heading`} className="overflow-hidden rounded-2xl border border-border bg-surface-1">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
+            <div className="flex touch-pan-y flex-wrap items-center justify-between gap-3 border-b border-border p-4">
                 <div className="flex items-center gap-3">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-accent/15 text-accent-text">
                         <Trophy size={20} aria-hidden="true" />
@@ -67,6 +77,7 @@ function LeagueStandings({ league, state }: { league: League; state: LeagueStand
 
                     {/* Keyboard-accessible scrolling keeps all eight columns readable on small screens. */}
                     <div
+                        data-standings-scroll
                         role="region"
                         aria-label={`${league.name} standings table`}
                         aria-describedby={`${league.id}-scroll-hint`}
@@ -132,7 +143,14 @@ function LeagueStandings({ league, state }: { league: League; state: LeagueStand
 
 /** Standings — fetches all five leagues once on mount; filters reuse those results. */
 function Standings() {
-    const [activeLeagueId, setActiveLeagueId] = useState('pl')
+    const [selection, setSelection] = useState({ id: 'pl', direction: 1, revision: 0 })
+    const activeLeagueId = selection.id
+    const activeIndex = LEAGUES.findIndex((league) => league.id === activeLeagueId)
+    const activeLeague = LEAGUES[activeIndex]
+    const [reduceMotion, setReduceMotion] = useState(() =>
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    )
+    const swipe = useRef<LeagueSwipe | null>(null)
     const [leagueStates, setLeagueStates] = useState<Record<string, LeagueStandingsState>>(() =>
         Object.fromEntries(LEAGUES.map((league) => [league.id, {
             standings: [],
@@ -141,6 +159,14 @@ function Standings() {
         }]))
     )
     const requests = useRef(new Map<string, Promise<Standing[]>>())
+
+    // Respect accessibility changes made while the page is already open.
+    useEffect(() => {
+        const preference = window.matchMedia('(prefers-reduced-motion: reduce)')
+        const updatePreference = () => setReduceMotion(preference.matches)
+        preference.addEventListener('change', updatePreference)
+        return () => preference.removeEventListener('change', updatePreference)
+    }, [])
 
     useEffect(() => {
         let isActive = true
@@ -177,7 +203,61 @@ function Standings() {
         return () => { isActive = false }
     }, [])
 
-    const visibleLeagues = LEAGUES.filter((league) => league.id === activeLeagueId)
+    /** Both button and gesture navigation share direction and animation state. */
+    function selectLeague(id: string) {
+        setSelection((previous) => {
+            if (previous.id === id) return previous
+            const previousIndex = LEAGUES.findIndex((league) => league.id === previous.id)
+            const nextIndex = LEAGUES.findIndex((league) => league.id === id)
+            if (nextIndex < 0) return previous
+            return { id, direction: nextIndex > previousIndex ? 1 : -1, revision: previous.revision + 1 }
+        })
+    }
+
+    function changeLeague(direction: number) {
+        const nextLeague = LEAGUES[activeIndex + direction]
+        if (nextLeague) selectLeague(nextLeague.id)
+    }
+
+    function startSwipe(event: TouchEvent<HTMLDivElement>) {
+        swipe.current = null
+        if (event.touches.length !== 1 || !(event.target instanceof Element)) return
+        if (event.target.closest('button, a')) return
+        const scrollRegion = event.target.closest<HTMLElement>('[data-standings-scroll]')
+        const touch = event.touches[0]
+        swipe.current = {
+            x: touch.clientX,
+            y: touch.clientY,
+            canGoNext: !scrollRegion || scrollRegion.scrollLeft + scrollRegion.clientWidth >= scrollRegion.scrollWidth - 2,
+            canGoPrevious: !scrollRegion || scrollRegion.scrollLeft <= 2,
+        }
+    }
+
+    function moveSwipe(event: TouchEvent<HTMLDivElement>) {
+        const start = swipe.current
+        if (!start) return
+        // Lock out vertical scrolling and pinch zoom for the rest of this gesture.
+        if (event.touches.length !== 1) {
+            swipe.current = null
+            return
+        }
+        const touch = event.touches[0]
+        const dx = Math.abs(touch.clientX - start.x)
+        const dy = Math.abs(touch.clientY - start.y)
+        if (dy > 12 && dy > dx) swipe.current = null
+    }
+
+    function endSwipe(event: TouchEvent<HTMLDivElement>) {
+        const start = swipe.current
+        swipe.current = null
+        if (!start || event.changedTouches.length !== 1) return
+        const touch = event.changedTouches[0]
+        const dx = touch.clientX - start.x
+        const dy = touch.clientY - start.y
+        if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return
+        if (dx < 0 && start.canGoNext) changeLeague(1)
+        if (dx > 0 && start.canGoPrevious) changeLeague(-1)
+    }
 
     return (
         <div className="space-y-6 bg-bg p-4">
@@ -192,12 +272,70 @@ function Standings() {
             </header>
 
             <div className="-mx-4">
-                <LeagueTabs activeId={activeLeagueId} onChange={setActiveLeagueId} showAll={false} />
+                <LeagueTabs activeId={activeLeagueId} onChange={selectLeague} showAll={false} />
             </div>
 
-            {visibleLeagues.map((league) => (
-                <LeagueStandings key={league.id} league={league} state={leagueStates[league.id]} />
-            ))}
+            <div
+                onTouchStart={startSwipe}
+                onTouchMove={moveSwipe}
+                onTouchEnd={endSwipe}
+                onTouchCancel={() => { swipe.current = null }}
+                className="space-y-3"
+            >
+                <div className="flex touch-pan-y items-center justify-between gap-3">
+                    <button
+                        type="button"
+                        aria-label="Previous league"
+                        disabled={activeIndex === 0}
+                        onClick={() => changeLeague(-1)}
+                        className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-border bg-surface-1 text-text-2 transition-colors duration-150 hover:bg-surface-3 hover:text-text focus-visible:outline-2 focus-visible:outline-accent-text disabled:cursor-default disabled:opacity-30 motion-reduce:transition-none"
+                    >
+                        <ChevronLeft size={18} aria-hidden="true" />
+                    </button>
+                    <div className="space-y-1 text-center">
+                        <p className="text-xs font-medium text-text-2 sm:hidden">Swipe header to change league</p>
+                        <p className="text-xs font-medium text-text-2">
+                            <span className="font-display font-bold tabular-nums text-accent-text">{activeIndex + 1}</span>
+                            <span className="mx-1.5">/</span>{LEAGUES.length} leagues
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        aria-label="Next league"
+                        disabled={activeIndex === LEAGUES.length - 1}
+                        onClick={() => changeLeague(1)}
+                        className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-border bg-surface-1 text-text-2 transition-colors duration-150 hover:bg-surface-3 hover:text-text focus-visible:outline-2 focus-visible:outline-accent-text disabled:cursor-default disabled:opacity-30 motion-reduce:transition-none"
+                    >
+                        <ChevronRight size={18} aria-hidden="true" />
+                    </button>
+                </div>
+
+                <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+                    {activeLeague.name}, league {activeIndex + 1} of {LEAGUES.length}
+                </p>
+
+                {/* Mount only the selected table so rapid swipes never leave stale content. */}
+                <div className="overflow-hidden rounded-2xl">
+                    <motion.div
+                        key={selection.revision}
+                        initial={selection.revision === 0 || reduceMotion ? false : { x: selection.direction * 28, opacity: 0.65 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ duration: reduceMotion ? 0 : 0.18, ease: [0.2, 0, 0, 1] }}
+                        className="relative"
+                    >
+                        <LeagueStandings league={activeLeague} state={leagueStates[activeLeagueId]} />
+                        {selection.revision > 0 && !reduceMotion && (
+                            <motion.div
+                                aria-hidden="true"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: [0, 0.7, 0] }}
+                                transition={{ duration: 1, times: [0, 0.15, 1], ease: 'easeOut' }}
+                                className={`pointer-events-none absolute inset-x-0 top-0 h-64 rounded-t-2xl from-accent/10 via-accent/5 to-transparent ${selection.direction > 0 ? 'bg-gradient-to-l' : 'bg-gradient-to-r'}`}
+                            />
+                        )}
+                    </motion.div>
+                </div>
+            </div>
         </div>
     )
 }

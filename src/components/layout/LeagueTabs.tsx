@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { LEAGUES } from '../../types/league'
 import HorizontalScroller from '../ui/HorizontalScroller'
 
@@ -16,6 +17,22 @@ function LeagueTabs({
     showAll?: boolean
 }) {
     const tabs = showAll ? [{ id: 'all', shortName: 'All' }, ...LEAGUES] : LEAGUES
+    const activeTab = useRef<HTMLButtonElement>(null)
+
+    /** Keep a selection made by swiping visible without moving the page vertically. */
+    useEffect(() => {
+        const button = activeTab.current
+        const scroller = button?.closest<HTMLElement>('[role="group"]')
+        if (!button || !scroller) return
+        const buttonRect = button.getBoundingClientRect()
+        const scrollerRect = scroller.getBoundingClientRect()
+        if (buttonRect.left < scrollerRect.left + 16 || buttonRect.right > scrollerRect.right - 16) {
+            scroller.scrollBy({
+                left: buttonRect.left - scrollerRect.left - (scrollerRect.width - buttonRect.width) / 2,
+                behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+            })
+        }
+    }, [activeId])
 
     return (
         <HorizontalScroller role="group" ariaLabel="Filter by league" className="flex gap-2 px-4 py-3">
@@ -24,6 +41,7 @@ function LeagueTabs({
                 return (
                     <button
                         key={tab.id}
+                        ref={isActive ? activeTab : undefined}
                         type="button"
                         aria-pressed={isActive}
                         onClick={() => onChange(tab.id)}

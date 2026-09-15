@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/api\/schedule-api/, ''),
           configure: (proxy) => {
             proxy.on('proxyReq', (proxyReq) => {
-              proxyReq.setHeader('X-Auth-Token', env.VITE_SCHEDULE_API_KEY)
+              proxyReq.setHeader('X-Auth-Token', env.SCHEDULE_API_KEY)
             })
           },
         },

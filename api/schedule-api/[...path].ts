@@ -17,7 +17,7 @@ export default async function handler(req: any, res: any) {
     const targetUrl = `https://api.football-data.org/v4/${pathSegments}${queryString ? `?${queryString}` : ''}`
 
     const apiResponse = await fetch(targetUrl, {
-        headers: { 'X-Auth-Token': process.env.VITE_SCHEDULE_API_KEY as string },
+        headers: { 'X-Auth-Token': process.env.SCHEDULE_API_KEY as string },
     })
 
     const data = await apiResponse.json()
