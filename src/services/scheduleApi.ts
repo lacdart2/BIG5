@@ -150,7 +150,8 @@ export function fetchWeekFixtures(): Promise<Match[]> {
     return fetchMatchesByDateRange(dateFrom, dateTo)
 }
 
-export function fetchTodayFixturesFallback(): Promise<Match[]> {
+/** Fetches today's fixtures — used by both Today and Live pages. */
+export function fetchTodayFixtures(): Promise<Match[]> {
     const today = new Date().toISOString().slice(0, 10)
     return fetchMatchesByDateRange(today, today)
 }

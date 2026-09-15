@@ -1,24 +1,21 @@
 import { useEffect, useState } from 'react'
 import MatchCard from '../components/ui/MatchCard'
-import { fetchTodayFixturesWithFallback } from '../services/fixturesService'
+import { fetchTodayFixtures } from '../services/scheduleApi'
 import type { Match } from '../types/football'
 
 /**
- * Live — reuses the same fallback-aware fetch as Today, filtered to
- * matches currently in progress.
+ * Live — reuses today's fixtures, filtered to matches currently in
+ * progress. NOTE: football-data.org's free tier is delayed, not
+ * real-time — live status/minute will lag actual play slightly.
  */
 function Live() {
     const [matches, setMatches] = useState<Match[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-    const [usedFallback, setUsedFallback] = useState(false)
 
     useEffect(() => {
-        fetchTodayFixturesWithFallback()
-            .then(({ matches, usedFallback }) => {
-                setMatches(matches.filter((m) => m.status === 'live'))
-                setUsedFallback(usedFallback)
-            })
+        fetchTodayFixtures()
+            .then((all) => setMatches(all.filter((m) => m.status === 'live')))
             .catch(() => setError('Could not load matches. Please try again.'))
             .finally(() => setIsLoading(false))
     }, [])
@@ -26,10 +23,6 @@ function Live() {
     return (
         <div className="flex flex-col gap-3 p-4">
             <h1 className="font-display text-2xl font-bold text-text">Live</h1>
-
-            {usedFallback && !isLoading && !error && (
-                <p className="text-[11px] text-text-3">Data may be delayed</p>
-            )}
 
             {isLoading && (
                 <p className="py-8 text-center text-sm text-text-3">Loading matches…</p>
