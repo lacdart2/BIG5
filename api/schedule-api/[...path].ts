@@ -1,3 +1,4 @@
+/// <reference types="node" />
 /**
  * Vercel serverless function replacing the local-only Vite dev proxy.
  * football-data.org's API doesn't support direct browser calls (broken
