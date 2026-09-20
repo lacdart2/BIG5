@@ -131,7 +131,7 @@ async function cachedFetch<T>(url: string, transform: (data: unknown) => T): Pro
 // ──────────────────────────────────────────────────────────────────────
 
 async function fetchMatchesByDateRange(dateFrom: string, dateTo: string): Promise<Match[]> {
-    const url = `/api/schedule-api/matches?dateFrom=${dateFrom}&dateTo=${dateTo}&competitions=${BIG5_CODES.join(',')}`
+    const url = `/api/schedule?endpoint=matches&dateFrom=${dateFrom}&dateTo=${dateTo}&competitions=${BIG5_CODES.join(',')}`
 
     return cachedFetch(url, (data) => {
         const matches: ScheduleApiMatch[] = (data as { matches?: ScheduleApiMatch[] }).matches ?? []
@@ -168,7 +168,7 @@ export async function fetchTodayFixtures(): Promise<Match[]> {
 }
 
 export async function fetchStandings(competitionCode: string): Promise<Standing[]> {
-    const url = `/api/schedule-api/competitions/${competitionCode}/standings`
+    const url = `/api/schedule?endpoint=competitions/${competitionCode}/standings`
 
     return cachedFetch(url, (data) => {
         const table = (data as StandingsResponse).standings?.[0]?.table ?? []

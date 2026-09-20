@@ -9,10 +9,16 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), tailwindcss()],
     server: {
       proxy: {
-        '/api/schedule-api': {
-          target: env.VITE_SCHEDULE_API_BASE_URL,
+        '/api/schedule': {
+          target: 'https://api.football-data.org/v4',
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/schedule-api/, ''),
+          rewrite: (path) => {
+            const url = new URL(path, 'http://localhost')
+            const endpoint = url.searchParams.get('endpoint') ?? ''
+            url.searchParams.delete('endpoint')
+            const qs = url.searchParams.toString()
+            return `/${endpoint}${qs ? `?${qs}` : ''}`
+          },
           configure: (proxy) => {
             proxy.on('proxyReq', (proxyReq) => {
               proxyReq.setHeader('X-Auth-Token', env.SCHEDULE_API_KEY)
