@@ -5,9 +5,9 @@ import InstallPrompt from './InstallPrompt'
 
 function Layout() {
     return (
-        <div className="mx-auto flex min-h-dvh max-w-xl flex-col bg-bg">
+        <div className="flex min-h-dvh flex-col bg-bg">
             <Header />
-            <main className="flex-1 pb-20">
+            <main className="flex-1 pb-20 lg:mx-auto lg:w-full lg:max-w-[1440px] lg:pb-0">
                 <Outlet />
             </main>
             <InstallPrompt />

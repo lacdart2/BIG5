@@ -50,7 +50,7 @@ function Live() {
     }
 
     return (
-        <div className="pb-4">
+        <div className="mx-auto w-full max-w-xl pb-4">
             <header className="today-hero border-b border-border px-4 py-6">
                 <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-accent-text">The matchday, unfolding</p>
                 <div className="flex items-center justify-between gap-3">

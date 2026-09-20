@@ -6,11 +6,16 @@ function LeagueEmblem({ src, label, code }: { src?: string; label: string; code?
     const [failedSource, setFailedSource] = useState<string>()
     const competitionCode = code ?? (label === 'PL' || label === 'Premier League' ? 'PL' : '')
     const source = resolveLeagueEmblem(competitionCode, src)
+    const hasImage = source && failedSource !== source
 
     return (
-        <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-full bg-surface-3 font-display text-[10px] font-bold text-text">
-            {source && failedSource !== source ? (
-                <img src={source} alt="" width={16} height={16} className="size-4 object-contain" onError={() => setFailedSource(source)} />
+        <span
+            aria-hidden="true"
+            className={`flex size-11 shrink-0 items-center justify-center rounded-full font-display text-[10px] font-bold text-text ${hasImage ? 'bg-white' : 'bg-surface-3'
+                }`}
+        >
+            {hasImage ? (
+                <img src={source} alt="" width={24} height={24} className="size-6 object-contain" onError={() => setFailedSource(source)} />
             ) : competitionCode === 'PL' ? 'PL' : label.slice(0, 2).toUpperCase()}
         </span>
     )

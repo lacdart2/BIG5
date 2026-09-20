@@ -1,7 +1,7 @@
 /** Editorial brand panel; no implied account, notification, or paid feature. */
 function PromoPanel() {
     return (
-        <aside className="today-hero relative overflow-hidden rounded-2xl border border-accent/25 p-5">
+        <aside className="today-hero relative flex flex-col overflow-hidden rounded-2xl border border-accent/25 p-5 lg:h-full lg:justify-center">
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent-text">From kickoff to the title race</p>
             <p className="mt-2 font-display text-2xl font-extrabold tracking-tight">Five leagues. All the feeling.</p>
             <p className="mt-2 max-w-80 text-sm leading-relaxed text-text-2">The weekend rivalries. The midweek drama. One place to follow it all.</p>

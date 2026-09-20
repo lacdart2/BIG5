@@ -40,7 +40,7 @@ function FeaturedMatch({ match, variant = 'hero' }: FeaturedMatchProps) {
                     </div>
                 ) : <span className="text-xs font-semibold text-text-2">Upcoming</span>}
             </div>
-            <div className={`today-hero px-4 ${compact ? 'py-4' : 'py-6'}`}>
+            <div className={`today-hero px-4 ${compact ? 'py-4' : 'py-6 lg:py-10'}`}>
                 {!compact && <div className="mb-6 flex items-center justify-center gap-2 text-xs text-text-2">
                     <LeagueEmblem src={match.competitionEmblem} label={match.competition} />
                     <span>{match.competition}{match.matchday != null && ` · Matchday ${match.matchday}`}</span>
@@ -52,10 +52,10 @@ function FeaturedMatch({ match, variant = 'hero' }: FeaturedMatchProps) {
                     </div>
                     <div className="text-center tabular-nums">
                         {live ? (
-                            <p aria-label={`Score ${match.homeScore ?? 'unavailable'} to ${match.awayScore ?? 'unavailable'}`} className={`flex items-center gap-2 font-display font-extrabold tracking-tighter text-text ${compact ? 'text-4xl' : 'text-5xl sm:text-6xl'}`}>
+                            <p aria-label={`Score ${match.homeScore ?? 'unavailable'} to ${match.awayScore ?? 'unavailable'}`} className={`flex items-center gap-2 font-display font-extrabold tracking-tighter text-text ${compact ? 'text-4xl' : 'text-5xl sm:text-6xl lg:text-7xl'}`}>
                                 <span>{match.homeScore ?? '—'}</span><span className="text-text-2">:</span><span>{match.awayScore ?? '—'}</span>
                             </p>
-                        ) : <time dateTime={match.kickoff} className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">{kickoff}</time>}
+                        ) : <time dateTime={match.kickoff} className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">{kickoff}</time>}
                         {!compact && <p className="mt-2 text-[10px] font-semibold uppercase tracking-widest text-text-2">{live ? 'Match in progress' : 'Kickoff'}</p>}
                     </div>
                     <div className="flex min-w-0 flex-col items-center gap-3 text-center">

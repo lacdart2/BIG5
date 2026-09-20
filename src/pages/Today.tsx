@@ -69,9 +69,9 @@ function Today() {
     return (
         <div className="pb-4">
             <Hero />
-            <div className="py-2">
+            <div className="py-2 lg:flex lg:items-center lg:justify-between lg:gap-2">
                 <LeagueTabs activeId={activeLeagueId} onChange={setActiveLeagueId} emblems={emblems} />
-                <div role="group" aria-label="Fixture date" className="flex items-center justify-between gap-3 px-4 pb-3">
+                <div role="group" aria-label="Fixture date" className="flex items-center justify-between gap-3 px-4 pb-3 lg:shrink-0 lg:pb-0">
                     <button type="button" aria-label="Previous day" disabled={dayIndex === 0} onClick={() => setDayIndex((previous) => previous - 1)} className={arrowClass}><ChevronLeft size={18} aria-hidden="true" /></button>
                     <div className="flex items-center gap-2 text-sm font-semibold"><CalendarDays size={16} className="text-accent-text" aria-hidden="true" /><time dateTime={selectedDate}>{dateLabel}</time></div>
                     <button type="button" aria-label="Next day" disabled={dayIndex === dates.length - 1} onClick={() => setDayIndex((previous) => previous + 1)} className={arrowClass}><ChevronRight size={18} aria-hidden="true" /></button>
@@ -96,16 +96,20 @@ function Today() {
                             <h2 className="font-display text-lg font-bold">A quiet day on the pitch.</h2>
                             <p className="mt-2 text-sm leading-relaxed text-text-2">No fixtures for {selectedLeague?.name ?? 'the Big Five'} on this date. Browse another day or league to see what’s coming up.</p>
                         </div>
+                    ) : featured ? (
+                        <div className="lg:grid lg:grid-cols-[1.15fr_1fr] lg:items-start lg:gap-5">
+                            <FeaturedMatch key={featured.id} match={featured} />
+                            <UpcomingList matches={visibleMatches.filter((match) => match.id !== featured.id)} />
+                        </div>
                     ) : (
-                        <>
-                            {featured && <FeaturedMatch key={featured.id} match={featured} />}
-                            <UpcomingList matches={visibleMatches.filter((match) => match.id !== featured?.id)} />
-                        </>
+                        <UpcomingList matches={visibleMatches} />
                     )}
                 </div>
-                <StandingsPreview emblems={emblems} />
-                <WeekPreview matches={weekMatches} loading={isLoading} error={error} emblems={emblems} />
-                <PromoPanel />
+                <div className="lg:grid lg:grid-cols-[1.1fr_1fr_0.8fr] lg:gap-5">
+                    <StandingsPreview emblems={emblems} />
+                    <WeekPreview matches={weekMatches} loading={isLoading} error={error} emblems={emblems} />
+                    <PromoPanel />
+                </div>
             </div>
         </div>
     )

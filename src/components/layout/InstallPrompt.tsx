@@ -34,7 +34,7 @@ function InstallPrompt() {
 
     return (
         <div
-            className="fixed inset-x-3 z-40 flex items-center justify-between gap-3 rounded-2xl bg-accent px-4 py-3"
+            className="fixed inset-x-3 z-40 flex items-center justify-between gap-3 rounded-2xl bg-accent px-4 py-3 lg:hidden"
             style={{ bottom: 'calc(4.5rem + env(safe-area-inset-bottom))' }}
         >
             <div className="flex items-center gap-2.5">

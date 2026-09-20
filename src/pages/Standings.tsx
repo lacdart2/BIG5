@@ -95,7 +95,7 @@ function Standings() {
     }
 
     return (
-        <div className="space-y-6 bg-bg p-4">
+        <div className="mx-auto w-full max-w-xl space-y-6 bg-bg p-4">
             <header className="today-hero -mx-4 -mt-4 space-y-2 border-b border-border px-4 py-6">
                 <p className="text-xs font-semibold uppercase tracking-widest text-accent-text">
                     The season in numbers
