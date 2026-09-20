@@ -97,12 +97,51 @@ function Today() {
                             <p className="mt-2 text-sm leading-relaxed text-text-2">No fixtures for {selectedLeague?.name ?? 'the Big Five'} on this date. Browse another day or league to see what’s coming up.</p>
                         </div>
                     ) : featured ? (
-                        <div className="lg:grid lg:grid-cols-[1.15fr_1fr] lg:items-start lg:gap-5">
-                            <FeaturedMatch key={featured.id} match={featured} />
-                            <UpcomingList matches={visibleMatches.filter((match) => match.id !== featured.id)} />
-                        </div>
+                        <>
+                            {/* Row 1: spotlight + other live matches */}
+                            <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr] lg:items-start lg:gap-5">
+                                <FeaturedMatch
+                                    key={featured.id}
+                                    match={featured}
+                                />
+
+                                <UpcomingList
+                                    matches={visibleMatches.filter(
+                                        (match) => match.id !== featured.id
+                                    )}
+                                    statuses={['live']}
+                                />
+                            </div>
+
+                            {/* Row 2: upcoming + finished */}
+                            <div className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-5">
+                                <UpcomingList
+                                    matches={visibleMatches.filter(
+                                        (match) => match.id !== featured.id
+                                    )}
+                                    statuses={['upcoming']}
+                                />
+
+                                <UpcomingList
+                                    matches={visibleMatches.filter(
+                                        (match) => match.id !== featured.id
+                                    )}
+                                    statuses={['finished']}
+                                />
+                            </div>
+                        </>
                     ) : (
-                        <UpcomingList matches={visibleMatches} />
+                        <div className="grid gap-6 lg:grid-cols-2 lg:gap-5">
+                            <UpcomingList
+                                matches={visibleMatches}
+                                statuses={['live', 'upcoming']}
+                            />
+
+                            <UpcomingList
+                                matches={visibleMatches}
+                                statuses={['finished']}
+                            />
+                        </div>
                     )}
                 </div>
                 <div className="lg:grid lg:grid-cols-[1.1fr_1fr_0.8fr] lg:gap-5">

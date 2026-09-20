@@ -20,7 +20,7 @@ function Header() {
             className="sticky top-0 z-40 border-b border-border bg-surface-1/95 backdrop-blur
                  pt-[env(safe-area-inset-top)]"
         >
-            <div className="mx-auto flex h-14 max-w-xl items-center justify-between px-4 lg:h-16 lg:max-w-[1440px] lg:px-6 xl:px-8">
+            <div className="mx-auto flex h-14 max-w-xl items-center justify-between px-4 lg:h-16 lg:max-w-[1220px] lg:px-6 xl:px-8">
                 <div className="flex items-center gap-2">
                     <svg width="22" height="22" viewBox="0 0 100 100" fill="none">
                         <circle cx="50" cy="50" r="34" stroke="#6366F1" strokeWidth="5" />
