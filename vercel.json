@@ -1,11 +1,39 @@
 {
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        },
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/"
+        }
+      ]
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/:path*",
       "destination": "/api/:path*"
     },
     {
-      "source": "/((?!api/|assets/|manifest\\.webmanifest$|sw\\.js$|workbox-.*\\.js$|pwa-.*\\.png$|favicon\\.png$).*)",
+      "source": "/((?!api/|sw\\.js$|manifest\\.webmanifest$).*)",
       "destination": "/index.html"
     }
   ]
