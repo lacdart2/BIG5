@@ -1,8 +1,6 @@
 {
           "rewrites": [
-                    { "source": "/week", "destination": "/index.html" },
-                    { "source": "/live", "destination": "/index.html" },
-                    { "source": "/standings", "destination": "/index.html" },
-                    { "source": "/favorites", "destination": "/index.html" }
+                    { "source": "/api/:path*", "destination": "/api/:path*" },
+                    { "source": "/((?!api).*)", "destination": "/index.html" }
           ]
 }
