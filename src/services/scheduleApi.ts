@@ -151,9 +151,20 @@ export function fetchWeekFixtures(): Promise<Match[]> {
 }
 
 /** Fetches today's fixtures — used by both Today and Live pages. */
-export function fetchTodayFixtures(): Promise<Match[]> {
-    const today = new Date().toISOString().slice(0, 10)
-    return fetchMatchesByDateRange(today, today)
+export async function fetchTodayFixtures(): Promise<Match[]> {
+    const today = new Date()
+    const tomorrow = new Date()
+    tomorrow.setDate(today.getDate() + 1)
+
+    const todayStr = today.toISOString().slice(0, 10)
+    const tomorrowStr = tomorrow.toISOString().slice(0, 10)
+
+    // football-data.org's dateTo appears to be exclusive, so a single-day
+    // range (dateFrom === dateTo) returns zero results even when matches
+    // exist. Querying today→tomorrow and filtering client-side avoids
+    // that boundary issue reliably.
+    const matches = await fetchMatchesByDateRange(todayStr, tomorrowStr)
+    return matches.filter((m) => m.kickoff.slice(0, 10) === todayStr)
 }
 
 export async function fetchStandings(competitionCode: string): Promise<Standing[]> {
