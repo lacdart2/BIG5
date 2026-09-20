@@ -13,8 +13,8 @@ export default defineConfig(({ mode }) => {
 
       VitePWA({
         registerType: 'autoUpdate',
-
-        injectRegister: 'auto',
+        injectRegister: false,
+        strategies: 'generateSW',
 
         includeAssets: [
           'favicon.png',
@@ -23,26 +23,32 @@ export default defineConfig(({ mode }) => {
         ],
 
         manifest: {
+          id: '/',
           name: 'BIG5 Football',
           short_name: 'BIG5',
-          description: 'Follow fixtures, live scores and standings across Europe’s Big Five leagues.',
+          description: 'Live scores, fixtures and standings across Europe’s Big Five leagues.',
           start_url: '/',
           scope: '/',
           display: 'standalone',
-
+          orientation: 'portrait-primary',
+          lang: 'en',
+          categories: ['sports'],
           background_color: '#000000',
           theme_color: '#000000',
+          prefer_related_applications: false,
 
           icons: [
             {
               src: '/pwa-192.png',
               sizes: '192x192',
               type: 'image/png',
+              purpose: 'any',
             },
             {
               src: '/pwa-512.png',
               sizes: '512x512',
               type: 'image/png',
+              purpose: 'any',
             },
             {
               src: '/pwa-512.png',
@@ -55,12 +61,13 @@ export default defineConfig(({ mode }) => {
 
         workbox: {
           navigateFallback: '/index.html',
-
+          navigateFallbackDenylist: [/^\/api\//],
           globPatterns: [
             '**/*.{js,css,html,ico,png,svg,webp,woff2}',
           ],
-
           cleanupOutdatedCaches: true,
+          clientsClaim: true,
+          skipWaiting: true,
         },
       }),
     ],
