@@ -18,6 +18,10 @@ export default async function handler(req: any, res: any) {
             headers: { 'X-Auth-Token': process.env.SCHEDULE_API_KEY as string },
         })
         const data = await apiResponse.json()
+        for (const header of ['Retry-After', 'X-RequestCounter-Reset']) {
+            const value = apiResponse.headers.get(header)
+            if (value) res.setHeader(header, value)
+        }
         res.status(apiResponse.status).json(data)
     } catch (err) {
         res.status(500).json({ error: 'Upstream request failed' })

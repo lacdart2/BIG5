@@ -46,3 +46,13 @@
     @apply bg-bg text-text font-sans;
   }
 }
+
+/* Floodlight atmosphere uses the existing BIG5 palette. */
+@layer components {
+  .today-hero {
+    background:
+      radial-gradient(ellipse at 95% 0%, color-mix(in srgb, var(--color-accent) 22%, transparent), transparent 65%),
+      radial-gradient(ellipse at 0% 0%, color-mix(in srgb, var(--color-text) 6%, transparent), transparent 45%),
+      var(--color-surface-1);
+  }
+}

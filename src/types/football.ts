@@ -29,5 +29,8 @@ export interface Match {
     homeScore: number | null
     awayScore: number | null
     competition: string
+    /** Official competition emblem, when supplied by football-data.org. */
+    competitionEmblem?: string
+    matchday?: number
     leagueApiId: number
 }

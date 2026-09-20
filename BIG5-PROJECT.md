@@ -1,5 +1,28 @@
 # BIG5 Football App — Project Context
 
+## Latest session — 2026-09-20: Week and Live visual uplift
+
+Implemented for local review; user validation is pending.
+
+- Week reuses `LeagueTabs` with API emblems, `UpcomingList`, and the new controlled `src/components/ui/DateNav.tsx`, matching Today's existing date-control appearance and seven-day bounds.
+- Live reuses `FeaturedMatch` with an optional compact variant, grouped in the existing five-league order, plus emblem filters. The default hero variant remains unchanged for Today.
+- `UpcomingList` accepts an optional live-section heading: Week uses "In play" while Today retains "Also live".
+- Both pages have loading/error/retry states and local filtering. Live's empty state reads "No live matches right now" and links to Today and Week. No polling, endpoint, dependency, timezone, scorer, or notification changes were added.
+- Scope clarification pending: the request both prohibits edits to Today.tsx and asks both pages to import DateNav. Today remains untouched in this session until the user approves the minimal extraction-only edit.
+- Production build, targeted ESLint, and diff checks passed. Real data rendered on Week and Live. Browser checks covered Live league filtering without extra requests, a simulated zero-live state and its navigation links, Week date-navigation bounds, and narrow-screen overflow. Manual user validation remains pending.
+
+## Latest session — 2026-09-20: Today visual uplift
+
+User reviewed the Today uplift positively and requested the Week/Live follow-up. Manual commit/push remains user-controlled.
+
+- Today now composes a CSS floodlight hero, emblem league filters, bounded seven-day date controls, derived match counts, a featured live/next fixture, remaining fixtures and results, top-five standings, a week summary, and a static brand panel.
+- One `fetchWeekFixtures()` response powers Today's date/league filtering and week preview. The standings preview requests PL initially, then other competitions on selection. Pending requests are reused during StrictMode effect replay.
+- Current data source is football-data.org through `/api/schedule?endpoint=…`. The earlier API-Football roadmap below is historical and does not describe the current integration.
+- Verification of the authenticated matches response returned 20 matches: all had `competition.emblem` and `matchday`; none had a minute or goal/event fields. Optional emblem/minute/matchday fields are mapped without inventing missing values. No scorers or event detail added.
+- Reused the locked dark design tokens and existing shared UI. No dependencies, other page restructures, timezone-display changes, or share/notification/favorites features added.
+- Validation: production build and targeted ESLint; browser checks with real fixtures/standings, 320px/375px mobile and desktop layouts, date boundaries, local league filtering, top-five table switching, and reduced-motion pulse suppression. Isolated browser simulations covered loading, API errors, retry, upcoming fallback, and missing emblems; simulated cache data was restored afterward.
+- User review and manual commit/push remain pending.
+
 ## Project Goal
 
 BIG5 is a modern football app focused on Europe’s top five domestic football leagues:

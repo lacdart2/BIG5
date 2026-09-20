@@ -1,78 +1,96 @@
-import { useEffect, useState } from 'react'
-import MatchCard from '../components/ui/MatchCard'
-import HorizontalScroller from '../components/ui/HorizontalScroller'
-import { fetchWeekFixtures } from '../services/scheduleApi'
+import { useEffect, useRef, useState } from 'react'
+import { CalendarDays } from 'lucide-react'
+import UpcomingList from '../components/today/UpcomingList'
+import LeagueTabs from '../components/layout/LeagueTabs'
+import ScheduleLoading from '../components/ui/ScheduleLoading'
+import DateNav from '../components/ui/DateNav'
+import { fetchWeekFixtures, scheduleErrorMessage } from '../services/scheduleApi'
+import { LEAGUES } from '../types/league'
 import type { Match } from '../types/football'
 
-function getWeekDates(): string[] {
-    return Array.from({ length: 7 }, (_, i) => {
-        const d = new Date()
-        d.setDate(d.getDate() + i)
-        return d.toISOString().slice(0, 10)
-    })
-}
-
-function formatTabLabel(dateStr: string, index: number) {
-    if (index === 0) return 'Today'
-    const d = new Date(dateStr)
-    return d.toLocaleDateString([], { weekday: 'short' })
-}
-
-const WEEK_DATES = getWeekDates()
-
+/** Seven days of fixtures, using Today's league filters and fixture presentation. */
 function Week() {
     const [allMatches, setAllMatches] = useState<Match[]>([])
-    const [selectedDate, setSelectedDate] = useState(WEEK_DATES[0])
+    const [dayIndex, setDayIndex] = useState(0)
+    const [activeLeagueId, setActiveLeagueId] = useState('all')
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [attempt, setAttempt] = useState(0)
+    const request = useRef<Promise<Match[]> | null>(null)
+    const [dates] = useState(() => Array.from({ length: 7 }, (_, index) => {
+        const date = new Date()
+        date.setDate(date.getDate() + index)
+        return date.toISOString().slice(0, 10)
+    }))
 
     useEffect(() => {
-        fetchWeekFixtures()
-            .then(setAllMatches)
-            .catch(() => setError('Could not load matches. Please try again.'))
-            .finally(() => setIsLoading(false))
-    }, [])
+        let active = true
+        request.current ??= fetchWeekFixtures()
+        request.current
+            .then((result) => { if (active) setAllMatches(result) })
+            .catch((error) => { if (active) setError(scheduleErrorMessage(error, 'Could not load the week’s fixtures. Please try again.')) })
+            .finally(() => { if (active) setIsLoading(false) })
+        return () => { active = false }
+    }, [attempt])
 
-    const matches = allMatches.filter((m) => m.kickoff.slice(0, 10) === selectedDate)
+    const selectedDate = dates[dayIndex]
+    const selectedLeague = LEAGUES.find((league) => league.id === activeLeagueId)
+    const matches = allMatches.filter((match) =>
+        match.kickoff.slice(0, 10) === selectedDate && (!selectedLeague || match.leagueApiId === selectedLeague.apiId)
+    ).sort((a, b) => a.kickoff.localeCompare(b.kickoff))
+    const emblems = Object.fromEntries(LEAGUES.map((league) => [
+        league.id, allMatches.find((match) => match.leagueApiId === league.apiId && match.competitionEmblem)?.competitionEmblem,
+    ]))
+    const dateLabel = new Date(`${selectedDate}T12:00:00`).toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })
+
+    function retryMatches() {
+        request.current = null
+        setError(null)
+        setIsLoading(true)
+        setAttempt((previous) => previous + 1)
+    }
 
     return (
-        <div className="flex flex-col">
-            <HorizontalScroller role="group" ariaLabel="Filter by date" className="flex gap-2 px-4 py-3">
-                {WEEK_DATES.map((date, i) => {
-                    const isActive = date === selectedDate
-                    return (
-                        <button
-                            key={date}
-                            type="button"
-                            aria-pressed={isActive}
-                            onClick={() => setSelectedDate(date)}
-                            className={`min-h-11 shrink-0 cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-text motion-reduce:transition-none
-                ${isActive ? 'bg-accent/15 text-accent-text hover:bg-accent/25 active:bg-accent/30' : 'bg-surface-2 text-text-2 hover:bg-surface-3 hover:text-text active:bg-accent/15 active:text-accent-text'}`}
-                        >
-                            {formatTabLabel(date, i)}
-                        </button>
-                    )
-                })}
-            </HorizontalScroller>
-
-            <div className="flex flex-col gap-3 px-4 pb-4">
-                {isLoading && (
-                    <p className="py-8 text-center text-sm text-text-3">Loading matches…</p>
-                )}
-
-                {!isLoading && error && (
-                    <p className="py-8 text-center text-sm text-live">{error}</p>
-                )}
-
-                {!isLoading && !error && matches.length === 0 && (
-                    <p className="py-8 text-center text-sm text-text-3">
-                        No Big 5 matches this day.
-                    </p>
-                )}
-
-                {!isLoading &&
-                    !error &&
-                    matches.map((match) => <MatchCard key={match.id} match={match} />)}
+        <div className="pb-4">
+            <header className="today-hero border-b border-border px-4 py-6">
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-accent-text">Seven days. Five leagues.</p>
+                <div className="flex items-center justify-between gap-3">
+                    <h1 className="font-display text-3xl font-extrabold tracking-tight">Your football week.</h1>
+                    <CalendarDays size={24} className="shrink-0 text-accent-text" aria-hidden="true" />
+                </div>
+                <p className="mt-2 text-sm leading-relaxed text-text-2">Find your next kickoff. Follow every matchday.</p>
+            </header>
+            <div className="py-2">
+                <LeagueTabs activeId={activeLeagueId} onChange={setActiveLeagueId} emblems={emblems} />
+                <DateNav dates={dates} activeIndex={dayIndex} onChange={setDayIndex} />
+            </div>
+            <div className="space-y-5 px-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
+                    <time dateTime={selectedDate} className="text-xs font-semibold text-text-2">{dateLabel}</time>
+                    <span className="text-xs tabular-nums text-accent-text">{isLoading || error ? '—' : matches.length} matches</span>
+                </div>
+                <p role="status" aria-atomic="true" className="sr-only">
+                    {dateLabel}, {selectedLeague?.name ?? 'all leagues'}: {isLoading ? 'loading fixtures' : error ? 'fixtures unavailable' : `${matches.length} matches`}
+                </p>
+                <div aria-busy={isLoading}>
+                    {isLoading ? (
+                        <div className="rounded-2xl border border-border bg-surface-1 p-5">
+                            <ScheduleLoading>Preparing your football week…</ScheduleLoading>
+                            <div aria-hidden="true" className="mt-4 h-36 animate-pulse rounded-xl bg-surface-2 motion-reduce:animate-none" />
+                        </div>
+                    ) : error ? (
+                        <div role="alert" className="rounded-2xl border border-border bg-surface-1 p-5">
+                            <p className="text-sm text-text-2">{error}</p>
+                            <button type="button" onClick={retryMatches} className="mt-3 min-h-11 cursor-pointer rounded-full bg-accent/15 px-4 text-sm font-semibold text-accent-text hover:bg-accent/25 focus-visible:outline-2 focus-visible:outline-accent-text">Retry fixtures</button>
+                        </div>
+                    ) : matches.length === 0 ? (
+                        <section className="today-hero rounded-2xl border border-border px-5 py-8">
+                            <CalendarDays size={28} aria-hidden="true" className="mb-4 text-accent-text" />
+                            <h2 className="text-balance font-display text-2xl font-extrabold tracking-tight">A break between matchdays.</h2>
+                            <p className="mt-3 text-sm leading-relaxed text-text-2">No fixtures for {selectedLeague?.name ?? 'the Big Five'} on this date. Use the arrows to explore another day, or choose a different league.</p>
+                        </section>
+                    ) : <UpcomingList matches={matches} liveHeading="In play" />}
+                </div>
             </div>
         </div>
     )
