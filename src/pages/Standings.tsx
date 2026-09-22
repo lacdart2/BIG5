@@ -6,7 +6,7 @@ import LeagueTabs from '../components/layout/LeagueTabs'
 import LeagueEmblem from '../components/ui/LeagueEmblem'
 import StandingsContent from '../components/ui/StandingsContent'
 import { useLeagueStandings } from '../hooks/useLeagueStandings'
-import { DOMESTIC_DOMESTIC_LEAGUES } from '../types/league'
+import { DOMESTIC_LEAGUES } from '../types/league'
 import { getLeagueEmblems, STANDINGS_CODES } from '../services/scheduleApi'
 
 /** Capture the starting scroll position so a swipe never steals table scrolling. */
