@@ -24,7 +24,7 @@ function WeekPreview({ matches, loading, error, emblems }: {
                 aria-busy={loading}
                 className="overflow-hidden rounded-2xl border border-border bg-surface-1 lg:flex-1"
             >
-                <p className="border-b border-border px-4 py-3 text-xs text-text-2">Next seven days · All five leagues</p>
+                <p className="border-b border-border px-4 py-3 text-xs text-text-2">Next seven days · Big Five + Champions League</p>
                 {loading ? <p className="p-4 text-sm text-text-2">Loading the week ahead…</p> : error ? <p className="p-4 text-sm text-text-2">Week preview is unavailable until fixtures load.</p> : (
                     <ul className="divide-y divide-border">
                         {LEAGUES.map((league) => {
