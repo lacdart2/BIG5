@@ -278,13 +278,35 @@ export async function fetchFixtureDiagnostics(): Promise<void> {
 
 export function fetchWeekFixtures(): Promise<Match[]> {
     const today = new Date()
+    const tomorrow = new Date(today)
+    tomorrow.setDate(today.getDate() + 1)
+
     const in7Days = new Date()
     in7Days.setDate(today.getDate() + 7)
 
     const dateFrom = today.toISOString().slice(0, 10)
+    const tomorrowStr = tomorrow.toISOString().slice(0, 10)
     const dateTo = in7Days.toISOString().slice(0, 10)
 
-    return fetchMatchesByDateRange(dateFrom, dateTo)
+    return fetchMatchesByDateRange(dateFrom, dateTo).then((matches) => {
+        const todayMatches = matches.filter((match) => match.kickoff.slice(0, 10) === dateFrom)
+        const tomorrowMatches = matches.filter((match) => match.kickoff.slice(0, 10) === tomorrowStr)
+
+        console.info('[BIG5 today/tomorrow diagnostics]', {
+            today: {
+                date: dateFrom,
+                total: todayMatches.length,
+                championsLeague: todayMatches.filter((match) => match.leagueApiId === 2001).length,
+            },
+            tomorrow: {
+                date: tomorrowStr,
+                total: tomorrowMatches.length,
+                championsLeague: tomorrowMatches.filter((match) => match.leagueApiId === 2001).length,
+            },
+        })
+
+        return matches
+    })
 }
 
 /** Fetches today's fixtures — used by both Today and Live pages. */
