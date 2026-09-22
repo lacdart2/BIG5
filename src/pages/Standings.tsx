@@ -6,7 +6,7 @@ import LeagueTabs from '../components/layout/LeagueTabs'
 import LeagueEmblem from '../components/ui/LeagueEmblem'
 import StandingsContent from '../components/ui/StandingsContent'
 import { useLeagueStandings } from '../hooks/useLeagueStandings'
-import { LEAGUES } from '../types/league'
+import { DOMESTIC_DOMESTIC_LEAGUES } from '../types/league'
 import { getLeagueEmblems, STANDINGS_CODES } from '../services/scheduleApi'
 
 /** Capture the starting scroll position so a swipe never steals table scrolling. */
@@ -21,8 +21,8 @@ interface LeagueSwipe {
 function Standings() {
     const [selection, setSelection] = useState({ id: 'pl', direction: 1, revision: 0 })
     const activeLeagueId = selection.id
-    const activeIndex = LEAGUES.findIndex((league) => league.id === activeLeagueId)
-    const activeLeague = LEAGUES[activeIndex]
+    const activeIndex = DOMESTIC_LEAGUES.findIndex((league) => league.id === activeLeagueId)
+    const activeLeague = DOMESTIC_LEAGUES[activeIndex]
     const [reduceMotion, setReduceMotion] = useState(() =>
         window.matchMedia('(prefers-reduced-motion: reduce)').matches
     )
@@ -42,15 +42,15 @@ function Standings() {
     function selectLeague(id: string) {
         setSelection((previous) => {
             if (previous.id === id) return previous
-            const previousIndex = LEAGUES.findIndex((league) => league.id === previous.id)
-            const nextIndex = LEAGUES.findIndex((league) => league.id === id)
+            const previousIndex = DOMESTIC_LEAGUES.findIndex((league) => league.id === previous.id)
+            const nextIndex = DOMESTIC_LEAGUES.findIndex((league) => league.id === id)
             if (nextIndex < 0) return previous
             return { id, direction: nextIndex > previousIndex ? 1 : -1, revision: previous.revision + 1 }
         })
     }
 
     function changeLeague(direction: number) {
-        const nextLeague = LEAGUES[activeIndex + direction]
+        const nextLeague = DOMESTIC_LEAGUES[activeIndex + direction]
         if (nextLeague) selectLeague(nextLeague.id)
     }
 
@@ -131,13 +131,13 @@ function Standings() {
                         <p className="text-xs font-medium text-text-2 sm:hidden">Swipe header to change league</p>
                         <p className="text-xs font-medium text-text-2">
                             <span className="font-display font-bold tabular-nums text-accent-text">{activeIndex + 1}</span>
-                            <span className="mx-1.5">/</span>{LEAGUES.length} leagues
+                            <span className="mx-1.5">/</span>{DOMESTIC_LEAGUES.length} leagues
                         </p>
                     </div>
                     <button
                         type="button"
                         aria-label="Next league"
-                        disabled={activeIndex === LEAGUES.length - 1}
+                        disabled={activeIndex === DOMESTIC_LEAGUES.length - 1}
                         onClick={() => changeLeague(1)}
                         className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-border bg-surface-1 text-text-2 transition-colors duration-150 hover:bg-surface-3 hover:text-text focus-visible:outline-2 focus-visible:outline-accent-text disabled:cursor-default disabled:opacity-30 motion-reduce:transition-none"
                     >
@@ -146,7 +146,7 @@ function Standings() {
                 </div>
 
                 <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
-                    {activeLeague.name}, league {activeIndex + 1} of {LEAGUES.length}
+                    {activeLeague.name}, league {activeIndex + 1} of {DOMESTIC_LEAGUES.length}
                 </p>
 
                 {/* Mount only the selected table so rapid swipes never leave stale content. */}
