@@ -211,7 +211,68 @@ async function fetchMatchesByDateRange(dateFrom: string, dateTo: string): Promis
 
     return cachedFetch(url, (data) => {
         const matches: ScheduleApiMatch[] = (data as { matches?: ScheduleApiMatch[] }).matches ?? []
+
+        const byDate = matches.reduce<Record<string, number>>((counts, match) => {
+            const date = match.utcDate.slice(0, 10)
+            counts[date] = (counts[date] ?? 0) + 1
+            return counts
+        }, {})
+
+        const byCompetition = matches.reduce<Record<string, number>>((counts, match) => {
+            const code = match.competition.code
+            counts[code] = (counts[code] ?? 0) + 1
+            return counts
+        }, {})
+
+        const championsLeagueMatches = matches.filter((match) => match.competition.code === 'CL')
+
+        console.info('[BIG5 fixtures]', {
+            dateFrom,
+            dateTo,
+            requestedCompetitions: FIXTURE_CODES,
+            totalMatches: matches.length,
+            matchesByDate: byDate,
+            matchesByCompetition: byCompetition,
+            championsLeagueCount: championsLeagueMatches.length,
+            championsLeagueMatches: championsLeagueMatches.map((match) => ({
+                kickoff: match.utcDate,
+                home: match.homeTeam.name,
+                away: match.awayTeam.name,
+                status: match.status,
+            })),
+        })
+
         return matches.map(mapMatch)
+    })
+}
+
+export async function fetchFixtureDiagnostics(): Promise<void> {
+    const today = new Date()
+    const tomorrow = new Date(today)
+    tomorrow.setDate(today.getDate() + 1)
+    const dayAfterTomorrow = new Date(today)
+    dayAfterTomorrow.setDate(today.getDate() + 2)
+
+    const todayStr = today.toISOString().slice(0, 10)
+    const tomorrowStr = tomorrow.toISOString().slice(0, 10)
+    const dayAfterTomorrowStr = dayAfterTomorrow.toISOString().slice(0, 10)
+
+    const matches = await fetchMatchesByDateRange(todayStr, dayAfterTomorrowStr)
+
+    const todayMatches = matches.filter((match) => match.kickoff.slice(0, 10) === todayStr)
+    const tomorrowMatches = matches.filter((match) => match.kickoff.slice(0, 10) === tomorrowStr)
+
+    console.info('[BIG5 today/tomorrow diagnostics]', {
+        today: {
+            date: todayStr,
+            total: todayMatches.length,
+            championsLeague: todayMatches.filter((match) => match.leagueApiId === 2001).length,
+        },
+        tomorrow: {
+            date: tomorrowStr,
+            total: tomorrowMatches.length,
+            championsLeague: tomorrowMatches.filter((match) => match.leagueApiId === 2001).length,
+        },
     })
 }
 
