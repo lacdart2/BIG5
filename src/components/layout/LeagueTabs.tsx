@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { LEAGUES } from '../../types/league'
+import { DOMESTIC_LEAGUES, LEAGUES } from '../../types/league'
 import HorizontalScroller from '../ui/HorizontalScroller'
 import LeagueEmblem from '../ui/LeagueEmblem'
 import { STANDINGS_CODES } from '../../services/scheduleApi'
@@ -20,7 +20,8 @@ function LeagueTabs({
     showAll?: boolean
     emblems?: Record<string, string | undefined>
 }) {
-    const tabs = showAll ? [{ id: 'all', name: 'All leagues', shortName: 'All' }, ...LEAGUES] : LEAGUES
+    const competitionTabs = showAll ? LEAGUES : DOMESTIC_LEAGUES
+    const tabs = showAll ? [{ id: 'all', name: 'All competitions', shortName: 'All' }, ...competitionTabs] : competitionTabs
     const activeTab = useRef<HTMLButtonElement>(null)
 
     /** Keep a selection made by swiping visible without moving the page vertically. */
