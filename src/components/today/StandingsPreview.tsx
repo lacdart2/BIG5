@@ -5,13 +5,13 @@ import LeagueTabs from '../layout/LeagueTabs'
 import StandingsContent from '../ui/StandingsContent'
 import { useLeagueStandings } from '../../hooks/useLeagueStandings'
 import { getLeagueEmblems } from '../../services/scheduleApi'
-import { LEAGUES } from '../../types/league'
+import { DOMESTIC_LEAGUES } from '../../types/league'
 
 /** Only the selected league is requested; the service shares cached and pending results. */
 function StandingsPreview({ emblems }: { emblems: Record<string, string | undefined> }) {
     const [activeId, setActiveId] = useState('pl')
     const state = useLeagueStandings(activeId)
-    const league = LEAGUES.find((item) => item.id === activeId)!
+    const league = DOMESTIC_LEAGUES.find((item) => item.id === activeId)!
     const artwork = { ...getLeagueEmblems() }
     for (const [id, emblem] of Object.entries(emblems)) {
         if (emblem) artwork[id] = emblem
