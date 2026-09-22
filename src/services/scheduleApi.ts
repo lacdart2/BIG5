@@ -2,7 +2,7 @@ import type { Match, MatchStatus, Team } from '../types/football'
 import { LEAGUES } from '../types/league'
 import { resolveLeagueEmblem } from '../utils/leagueEmblems'
 
-const BIG5_CODES = ['PL', 'PD', 'SA', 'BL1', 'FL1']
+const FIXTURE_CODES = ['PL', 'PD', 'SA', 'BL1', 'FL1', 'CL']
 
 export const STANDINGS_CODES: Record<string, string> = {
     pl: 'PL',
@@ -10,6 +10,7 @@ export const STANDINGS_CODES: Record<string, string> = {
     seriea: 'SA',
     bundesliga: 'BL1',
     ligue1: 'FL1',
+    ucl: 'CL',
 }
 
 const CODE_TO_CANONICAL_ID: Record<string, number> = Object.fromEntries(
@@ -206,7 +207,7 @@ function cachedFetch<T>(url: string, transform: (data: unknown) => T): Promise<T
 // ──────────────────────────────────────────────────────────────────────
 
 async function fetchMatchesByDateRange(dateFrom: string, dateTo: string): Promise<Match[]> {
-    const url = `/api/schedule?endpoint=matches&dateFrom=${dateFrom}&dateTo=${dateTo}&competitions=${BIG5_CODES.join(',')}`
+    const url = `/api/schedule?endpoint=matches&dateFrom=${dateFrom}&dateTo=${dateTo}&competitions=${FIXTURE_CODES.join(',')}`
 
     return cachedFetch(url, (data) => {
         const matches: ScheduleApiMatch[] = (data as { matches?: ScheduleApiMatch[] }).matches ?? []
