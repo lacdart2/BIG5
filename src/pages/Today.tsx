@@ -16,8 +16,7 @@ import { useLocale } from '../i18n/LocaleProvider'
 
 /** Matchday home: one fixture response powers the selected day and week preview. */
 function Today() {
-    const { t, dateLocale, competitionName, isRTL, locale } = useLocale()
-    const localeLoadingText = locale === 'ar' ? 'جارٍ تحضير يوم المباريات…' : 'Preparing your matchday…'
+    const { t, dateLocale, competitionName, isRTL } = useLocale()
     const [matches, setMatches] = useState<Match[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -86,7 +85,7 @@ function Today() {
                 <div aria-busy={isLoading} className="space-y-6">
                     {isLoading ? (
                         <div className="rounded-2xl border border-border bg-surface-1 p-5">
-                            <ScheduleLoading>{localeLoadingText}</ScheduleLoading>
+                            <ScheduleLoading>{t('today.loading')}</ScheduleLoading>
                             <div aria-hidden="true" className="mt-5 h-36 animate-pulse rounded-xl bg-surface-2 motion-reduce:animate-none" />
                         </div>
                     ) : error ? (
