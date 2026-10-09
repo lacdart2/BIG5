@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import TeamCrest from '../ui/TeamCrest'
 import LiveIndicator from '../ui/LiveIndicator'
 import LeagueEmblem from '../ui/LeagueEmblem'
@@ -19,6 +20,7 @@ function FeaturedMatch({ match, variant = 'hero' }: FeaturedMatchProps) {
     const kickoff = new Date(match.kickoff).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 
     return (
+        <Link to={`/match/${match.id}`} className="block rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-text">
         <motion.section
             aria-label={compact ? `${match.homeTeam.name} vs ${match.awayTeam.name}` : t('featured.match')}
             initial={reducedMotion ? false : { opacity: 0, y: 8 }}
@@ -69,6 +71,7 @@ function FeaturedMatch({ match, variant = 'hero' }: FeaturedMatchProps) {
 
             {live && !compact && <p className="border-t border-border px-4 py-2 text-center text-[11px] text-text-2">{t('featured.scoresDelayed')}</p>}
         </motion.section>
+        </Link>
     )
 }
 
