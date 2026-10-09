@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, CalendarDays, MapPin, Shield, Star, Trophy, UserRound, Users } from 'lucide-react'
+import { ArrowLeft, CalendarDays, Shield, Star, Trophy, UserRound, Users } from 'lucide-react'
 import TeamCrest from '../components/ui/TeamCrest'
 import LeagueEmblem from '../components/ui/LeagueEmblem'
 import ScheduleLoading from '../components/ui/ScheduleLoading'
@@ -77,6 +77,7 @@ function TeamDetails() {
     useEffect(() => {
         if (!teamId) return
 
+        const activeTeamId = teamId
         let active = true
         setIsLoading(true)
         setError(null)
@@ -84,8 +85,8 @@ function TeamDetails() {
         async function load() {
             try {
                 const [profile, teamMatches] = await Promise.all([
-                    fetchTeamProfile(teamId),
-                    fetchTeamMatches(teamId),
+                    fetchTeamProfile(activeTeamId),
+                    fetchTeamMatches(activeTeamId),
                 ])
 
                 if (!active) return
