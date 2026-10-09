@@ -33,6 +33,7 @@
   /* Fonts */
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: "Noto Sans Arabic", "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* ── Base ────────────────────────────────────────────────────── */
@@ -45,7 +46,16 @@
   body {
     @apply bg-bg text-text font-sans;
   }
+
+  html[dir="rtl"] body {
+    font-family: var(--font-arabic);
+  }
+
+  html[dir="rtl"] .font-display {
+    font-family: var(--font-arabic);
+  }
 }
+
 
 /* Floodlight atmosphere uses the existing BIG5 palette. */
 @layer components {
