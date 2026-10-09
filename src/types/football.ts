@@ -34,3 +34,13 @@ export interface Match {
     matchday?: number
     leagueApiId: number
 }
+
+
+export interface MatchDetails extends Match {
+    venue?: string
+    attendance?: number
+    referee?: string
+    stage?: string
+    group?: string
+    lastUpdated?: string
+}
