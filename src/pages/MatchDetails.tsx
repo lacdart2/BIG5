@@ -99,10 +99,14 @@ function MatchDetailsPage() {
 
                 <div className="today-hero px-5 py-8">
                     <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-                        <div className="flex min-w-0 flex-col items-center gap-3 text-center">
+                        <Link
+                            to={'/team/' + match.homeTeam.id}
+                            className="flex min-w-0 flex-col items-center gap-3 rounded-2xl p-2 text-center transition-colors hover:bg-surface-1/50 active:bg-surface-2 focus-visible:outline-2 focus-visible:outline-accent-text"
+                        >
                             <TeamCrest team={match.homeTeam} size={64} />
                             <h1 dir="ltr" className="break-words font-display text-base font-extrabold">{match.homeTeam.name}</h1>
-                        </div>
+                            <span className="text-[11px] font-semibold text-accent-text">{t('matchDetails.viewTeam')}</span>
+                        </Link>
 
                         <div className="text-center" dir="ltr">
                             {match.status === 'upcoming' ? (
@@ -122,10 +126,14 @@ function MatchDetailsPage() {
                             )}
                         </div>
 
-                        <div className="flex min-w-0 flex-col items-center gap-3 text-center">
+                        <Link
+                            to={'/team/' + match.awayTeam.id}
+                            className="flex min-w-0 flex-col items-center gap-3 rounded-2xl p-2 text-center transition-colors hover:bg-surface-1/50 active:bg-surface-2 focus-visible:outline-2 focus-visible:outline-accent-text"
+                        >
                             <TeamCrest team={match.awayTeam} size={64} />
                             <h1 dir="ltr" className="break-words font-display text-base font-extrabold">{match.awayTeam.name}</h1>
-                        </div>
+                            <span className="text-[11px] font-semibold text-accent-text">{t('matchDetails.viewTeam')}</span>
+                        </Link>
                     </div>
 
                     <p className="mt-7 text-center text-sm text-text-2">{dateLabel}</p>
