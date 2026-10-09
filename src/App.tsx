@@ -5,6 +5,7 @@ import Week from './pages/Week'
 import Live from './pages/Live'
 import Standings from './pages/Standings'
 import Favorites from './pages/Favorites'
+import MatchDetails from './pages/MatchDetails'
 import { LocaleProvider } from './i18n/LocaleProvider'
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
             <Route path="live" element={<Live />} />
             <Route path="standings" element={<Standings />} />
             <Route path="favorites" element={<Favorites />} />
+            <Route path="match/:matchId" element={<MatchDetails />} />
           </Route>
         </Routes>
       </BrowserRouter>
