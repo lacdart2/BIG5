@@ -12,9 +12,12 @@ import PromoPanel from '../components/today/PromoPanel'
 import { fetchWeekFixtures, scheduleErrorMessage } from '../services/scheduleApi'
 import { LEAGUES } from '../types/league'
 import type { Match } from '../types/football'
+import { useLocale } from '../i18n/LocaleProvider'
 
 /** Matchday home: one fixture response powers the selected day and week preview. */
 function Today() {
+    const { t, dateLocale, competitionName, isRTL, locale } = useLocale()
+    const localeLoadingText = locale === 'ar' ? 'جارٍ تحضير يوم المباريات…' : 'Preparing your matchday…'
     const [matches, setMatches] = useState<Match[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -56,7 +59,7 @@ function Today() {
     const emblems = Object.fromEntries(LEAGUES.map((league) => [
         league.id, matches.find((match) => match.leagueApiId === league.apiId && match.competitionEmblem)?.competitionEmblem,
     ]))
-    const dateLabel = `${dayIndex === 0 ? 'Today · ' : ''}${new Date(`${selectedDate}T12:00:00`).toLocaleDateString([], { month: 'short', day: 'numeric' })}`
+    const dateLabel = `${dayIndex === 0 ? `${t('date.today')} · ` : ''}${new Date(`${selectedDate}T12:00:00`).toLocaleDateString(dateLocale, { month: 'short', day: 'numeric' })}`
     const arrowClass = 'flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-border bg-surface-1 text-text-2 transition-colors hover:bg-surface-3 hover:text-text active:bg-accent/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-text disabled:cursor-default disabled:opacity-30 motion-reduce:transition-none'
 
     function retryFixtures() {
@@ -71,30 +74,30 @@ function Today() {
             <Hero />
             <div className="py-2 lg:flex lg:items-center lg:justify-between lg:gap-2">
                 <LeagueTabs activeId={activeLeagueId} onChange={setActiveLeagueId} emblems={emblems} />
-                <div role="group" aria-label="Fixture date" className="flex items-center justify-between gap-3 px-4 pb-3 lg:shrink-0 lg:pb-0">
-                    <button type="button" aria-label="Previous day" disabled={dayIndex === 0} onClick={() => setDayIndex((previous) => previous - 1)} className={arrowClass}><ChevronLeft size={18} aria-hidden="true" /></button>
+                <div role="group" aria-label={t('date.fixtureDate')} className="flex items-center justify-between gap-3 px-4 pb-3 lg:shrink-0 lg:pb-0">
+                    <button type="button" aria-label={t('date.previousDay')} disabled={dayIndex === 0} onClick={() => setDayIndex((previous) => previous - 1)} className={arrowClass}><ChevronLeft size={18} aria-hidden="true" className={isRTL ? '-scale-x-100' : ''} /></button>
                     <div className="flex items-center gap-2 text-sm font-semibold"><CalendarDays size={16} className="text-accent-text" aria-hidden="true" /><time dateTime={selectedDate}>{dateLabel}</time></div>
-                    <button type="button" aria-label="Next day" disabled={dayIndex === dates.length - 1} onClick={() => setDayIndex((previous) => previous + 1)} className={arrowClass}><ChevronRight size={18} aria-hidden="true" /></button>
+                    <button type="button" aria-label={t('date.nextDay')} disabled={dayIndex === dates.length - 1} onClick={() => setDayIndex((previous) => previous + 1)} className={arrowClass}><ChevronRight size={18} aria-hidden="true" className={isRTL ? '-scale-x-100' : ''} /></button>
                 </div>
             </div>
             <div className="space-y-6 px-4">
                 <StatsStrip date={selectedDate} matches={visibleMatches} pending={isLoading || !!error} />
-                <p role="status" aria-atomic="true" className="sr-only">{dateLabel}, {selectedLeague?.name ?? 'all leagues'}: {isLoading ? 'loading fixtures' : error ? 'fixtures unavailable' : `${visibleMatches.length} matches`}</p>
+                <p role="status" aria-atomic="true" className="sr-only">{dateLabel}, {selectedLeague ? competitionName(selectedLeague.name) : t('common.allCompetitions')}: {isLoading ? 'loading fixtures' : error ? 'fixtures unavailable' : `${visibleMatches.length} matches`}</p>
                 <div aria-busy={isLoading} className="space-y-6">
                     {isLoading ? (
                         <div className="rounded-2xl border border-border bg-surface-1 p-5">
-                            <ScheduleLoading>Preparing your matchday…</ScheduleLoading>
+                            <ScheduleLoading>{localeLoadingText}</ScheduleLoading>
                             <div aria-hidden="true" className="mt-5 h-36 animate-pulse rounded-xl bg-surface-2 motion-reduce:animate-none" />
                         </div>
                     ) : error ? (
                         <div role="alert" className="rounded-2xl border border-border bg-surface-1 p-5">
                             <p className="text-sm text-text-2">{error}</p>
-                            <button type="button" onClick={retryFixtures} className="mt-3 min-h-11 cursor-pointer rounded-full bg-accent/15 px-4 text-sm font-semibold text-accent-text hover:bg-accent/25 focus-visible:outline-2 focus-visible:outline-accent-text">Retry fixtures</button>
+                            <button type="button" onClick={retryFixtures} className="mt-3 min-h-11 cursor-pointer rounded-full bg-accent/15 px-4 text-sm font-semibold text-accent-text hover:bg-accent/25 focus-visible:outline-2 focus-visible:outline-accent-text">{t('week.retry')}</button>
                         </div>
                     ) : visibleMatches.length === 0 ? (
                         <div className="rounded-2xl border border-border bg-surface-1 p-6">
-                            <h2 className="font-display text-lg font-bold">A quiet day on the pitch.</h2>
-                            <p className="mt-2 text-sm leading-relaxed text-text-2">No fixtures for {selectedLeague?.name ?? 'the Big Five'} on this date. Browse another day or league to see what’s coming up.</p>
+                            <h2 className="font-display text-lg font-bold">{t('week.emptyTitle')}</h2>
+                            <p className="mt-2 text-sm leading-relaxed text-text-2">{t('week.emptyBody', { league: selectedLeague ? competitionName(selectedLeague.name) : t('common.allCompetitions') })}</p>
                         </div>
                     ) : featured ? (
                         <>
