@@ -8,6 +8,7 @@ import StandingsContent from '../components/ui/StandingsContent'
 import { useLeagueStandings } from '../hooks/useLeagueStandings'
 import { DOMESTIC_LEAGUES } from '../types/league'
 import { getLeagueEmblems, STANDINGS_CODES } from '../services/scheduleApi'
+import { useLocale } from '../i18n/LocaleProvider'
 
 /** Capture the starting scroll position so a swipe never steals table scrolling. */
 interface LeagueSwipe {
@@ -19,6 +20,7 @@ interface LeagueSwipe {
 
 /** The full standings page reuses the preview's table and lazy fetching. */
 function Standings() {
+    const { t, competitionName, isRTL } = useLocale()
     const [selection, setSelection] = useState({ id: 'pl', direction: 1, revision: 0 })
     const activeLeagueId = selection.id
     const activeIndex = DOMESTIC_LEAGUES.findIndex((league) => league.id === activeLeagueId)
@@ -101,9 +103,9 @@ function Standings() {
                     The season in numbers
                 </p>
                 <h1 className="font-display text-3xl font-extrabold tracking-tight text-text">
-                    Standings<span className="text-accent">.</span>
+                    {t('standings.title')}<span className="text-accent">.</span>
                 </h1>
-                <p className="text-sm text-text-2">Every point counts. Follow the race to the top.</p>
+                <p className="text-sm text-text-2">{t('standings.subtitle')}</p>
             </header>
 
             <div className="-mx-4">
@@ -120,15 +122,15 @@ function Standings() {
                 <div className="flex touch-pan-y items-center justify-between gap-3">
                     <button
                         type="button"
-                        aria-label="Previous league"
+                        aria-label={t('standings.previous')}
                         disabled={activeIndex === 0}
                         onClick={() => changeLeague(-1)}
                         className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-border bg-surface-1 text-text-2 transition-colors duration-150 hover:bg-surface-3 hover:text-text focus-visible:outline-2 focus-visible:outline-accent-text disabled:cursor-default disabled:opacity-30 motion-reduce:transition-none"
                     >
-                        <ChevronLeft size={18} aria-hidden="true" />
+                        <ChevronLeft size={18} aria-hidden="true" className={isRTL ? '-scale-x-100' : ''} />
                     </button>
                     <div className="space-y-1 text-center">
-                        <p className="text-xs font-medium text-text-2 sm:hidden">Swipe header to change league</p>
+                        <p className="text-xs font-medium text-text-2 sm:hidden">{t('standings.swipe')}</p>
                         <p className="text-xs font-medium text-text-2">
                             <span className="font-display font-bold tabular-nums text-accent-text">{activeIndex + 1}</span>
                             <span className="mx-1.5">/</span>{DOMESTIC_LEAGUES.length} leagues
@@ -136,17 +138,17 @@ function Standings() {
                     </div>
                     <button
                         type="button"
-                        aria-label="Next league"
+                        aria-label={t('standings.next')}
                         disabled={activeIndex === DOMESTIC_LEAGUES.length - 1}
                         onClick={() => changeLeague(1)}
                         className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-border bg-surface-1 text-text-2 transition-colors duration-150 hover:bg-surface-3 hover:text-text focus-visible:outline-2 focus-visible:outline-accent-text disabled:cursor-default disabled:opacity-30 motion-reduce:transition-none"
                     >
-                        <ChevronRight size={18} aria-hidden="true" />
+                        <ChevronRight size={18} aria-hidden="true" className={isRTL ? '-scale-x-100' : ''} />
                     </button>
                 </div>
 
                 <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">
-                    {activeLeague.name}, league {activeIndex + 1} of {DOMESTIC_LEAGUES.length}
+                    {competitionName(activeLeague.name)}, {activeIndex + 1} of {DOMESTIC_LEAGUES.length}
                 </p>
 
                 {/* Mount only the selected table so rapid swipes never leave stale content. */}
@@ -163,7 +165,7 @@ function Standings() {
                                 <LeagueEmblem code={STANDINGS_CODES[activeLeagueId]} src={emblems[activeLeagueId]} label={activeLeague.shortName} />
                                 <div className="flex-1">
                                     <p className="text-[11px] uppercase tracking-widest text-text-2">{activeLeague.country}</p>
-                                    <h2 id="standings-league-title" className="font-display text-lg font-bold">{activeLeague.name}</h2>
+                                    <h2 id="standings-league-title" className="font-display text-lg font-bold">{competitionName(activeLeague.name)}</h2>
                                 </div>
                                 <Trophy size={20} aria-hidden="true" className="text-accent-text" />
                             </div>
