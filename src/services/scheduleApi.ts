@@ -17,6 +17,67 @@ const CODE_TO_CANONICAL_ID: Record<string, number> = Object.fromEntries(
     LEAGUES.map((league) => [STANDINGS_CODES[league.id], league.apiId])
 )
 
+
+export interface TeamPerson {
+    id: string
+    name: string
+    position?: string
+    nationality?: string
+    dateOfBirth?: string
+}
+
+export interface TeamProfile {
+    id: string
+    name: string
+    shortName: string
+    tla?: string
+    crestUrl?: string
+    country?: string
+    countryFlag?: string
+    founded?: number
+    venue?: string
+    website?: string
+    clubColors?: string
+    coach?: {
+        name: string
+        nationality?: string
+    }
+    squad: TeamPerson[]
+    runningCompetitions: {
+        id: number
+        name: string
+        code: string
+        emblem?: string
+    }[]
+}
+
+interface ScheduleApiTeam {
+    id: number
+    name: string
+    shortName: string | null
+    tla?: string | null
+    crest?: string | null
+    area?: { name?: string | null; flag?: string | null }
+    founded?: number | null
+    venue?: string | null
+    website?: string | null
+    clubColors?: string | null
+    coach?: { name?: string | null; nationality?: string | null } | null
+    squad?: {
+        id: number
+        name: string
+        position?: string | null
+        nationality?: string | null
+        dateOfBirth?: string | null
+    }[]
+    runningCompetitions?: {
+        id: number
+        name: string
+        code: string
+        emblem?: string | null
+    }[]
+}
+
 export interface Standing {
     position: number
     team: Team
@@ -105,6 +166,8 @@ function mapMatch(m: ScheduleApiMatch): Match {
 // Applies in development and production. Pending requests are also shared
 // across components and StrictMode effect replays within this browser tab.
 const CACHE_TTL_MS = 2 * 60 * 1000 // 2 minutes
+const TEAM_CACHE_TTL_MS = 30 * 60 * 1000 // team metadata changes slowly
+const TEAM_MATCHES_CACHE_TTL_MS = 5 * 60 * 1000
 const inFlight = new Map<string, Promise<unknown>>()
 const retrying = new Set<string>()
 const retryListeners = new Set<() => void>()
@@ -167,12 +230,12 @@ async function fetchWithBackoff(url: string): Promise<Response> {
     }
 }
 
-function getCached<T>(key: string): T | null {
+function getCached<T>(key: string, ttlMs = CACHE_TTL_MS): T | null {
     try {
         const raw = sessionStorage.getItem(key)
         if (!raw) return null
         const { timestamp, data } = JSON.parse(raw)
-        if (Date.now() - timestamp > CACHE_TTL_MS) return null
+        if (Date.now() - timestamp > ttlMs) return null
         return data as T
     } catch {
         return null
@@ -194,8 +257,8 @@ export function getLeagueEmblems(): Record<string, string | undefined> {
     ]))
 }
 
-function cachedFetch<T>(url: string, transform: (data: unknown) => T): Promise<T> {
-    const cached = getCached<T>(url)
+function cachedFetch<T>(url: string, transform: (data: unknown) => T, ttlMs = CACHE_TTL_MS): Promise<T> {
+    const cached = getCached<T>(url, ttlMs)
     if (cached !== null) return Promise.resolve(cached)
     const pending = inFlight.get(url)
     if (pending) return pending as Promise<T>
@@ -376,4 +439,59 @@ export async function fetchMatchDetails(matchId: string): Promise<MatchDetails> 
             lastUpdated: match.lastUpdated ?? undefined,
         }
     })
+}
+
+
+export async function fetchTeamProfile(teamId: string): Promise<TeamProfile> {
+    const url = `/api/schedule?endpoint=teams/${encodeURIComponent(teamId)}`
+
+    return cachedFetch(url, (data) => {
+        const team = data as ScheduleApiTeam
+        return {
+            id: String(team.id),
+            name: team.name,
+            shortName: team.shortName ?? team.name,
+            tla: team.tla ?? undefined,
+            crestUrl: team.crest ?? undefined,
+            country: team.area?.name ?? undefined,
+            countryFlag: team.area?.flag ?? undefined,
+            founded: team.founded ?? undefined,
+            venue: team.venue ?? undefined,
+            website: team.website ?? undefined,
+            clubColors: team.clubColors ?? undefined,
+            coach: team.coach?.name ? {
+                name: team.coach.name,
+                nationality: team.coach.nationality ?? undefined,
+            } : undefined,
+            squad: (team.squad ?? []).map((person) => ({
+                id: String(person.id),
+                name: person.name,
+                position: person.position ?? undefined,
+                nationality: person.nationality ?? undefined,
+                dateOfBirth: person.dateOfBirth ?? undefined,
+            })),
+            runningCompetitions: (team.runningCompetitions ?? []).map((competition) => ({
+                id: competition.id,
+                name: competition.name,
+                code: competition.code,
+                emblem: competition.emblem ?? undefined,
+            })),
+        }
+    }, TEAM_CACHE_TTL_MS)
+}
+
+export async function fetchTeamMatches(teamId: string): Promise<Match[]> {
+    const from = new Date()
+    from.setDate(from.getDate() - 60)
+    const to = new Date()
+    to.setDate(to.getDate() + 60)
+
+    const dateFrom = from.toISOString().slice(0, 10)
+    const dateTo = to.toISOString().slice(0, 10)
+    const url = `/api/schedule?endpoint=teams/${encodeURIComponent(teamId)}/matches&dateFrom=${dateFrom}&dateTo=${dateTo}&limit=50`
+
+    return cachedFetch(url, (data) => {
+        const matches = (data as { matches?: ScheduleApiMatch[] }).matches ?? []
+        return matches.map(mapMatch)
+    }, TEAM_MATCHES_CACHE_TTL_MS)
 }
