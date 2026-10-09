@@ -1,4 +1,4 @@
-import type { Match, MatchStatus, Team } from '../types/football'
+import type { Match, MatchDetails, MatchStatus, Team } from '../types/football'
 import { LEAGUES } from '../types/league'
 import { resolveLeagueEmblem } from '../utils/leagueEmblems'
 
@@ -51,6 +51,12 @@ interface ScheduleApiMatch {
     competition: { id: number; name: string; code: string; emblem?: string | null }
     minute?: number | null
     matchday?: number | null
+    venue?: string | null
+    attendance?: number | null
+    stage?: string | null
+    group?: string | null
+    lastUpdated?: string | null
+    referees?: { id?: number; name?: string | null; type?: string | null; nationality?: string | null }[]
     homeTeam: { id: number; name: string; shortName: string | null; crest: string | null }
     awayTeam: { id: number; name: string; shortName: string | null; crest: string | null }
     score: {
@@ -348,5 +354,26 @@ export async function fetchStandings(competitionCode: string): Promise<Standing[
             goalDifference: row.goalDifference,
             points: row.points,
         }))
+    })
+}
+
+
+export async function fetchMatchDetails(matchId: string): Promise<MatchDetails> {
+    const url = `/api/schedule?endpoint=matches/${encodeURIComponent(matchId)}`
+
+    return cachedFetch(url, (data) => {
+        const match = data as ScheduleApiMatch
+        const base = mapMatch(match)
+        const mainReferee = match.referees?.find((referee) => referee.type === 'REFEREE') ?? match.referees?.[0]
+
+        return {
+            ...base,
+            venue: match.venue ?? undefined,
+            attendance: match.attendance ?? undefined,
+            referee: mainReferee?.name ?? undefined,
+            stage: match.stage ?? undefined,
+            group: match.group ?? undefined,
+            lastUpdated: match.lastUpdated ?? undefined,
+        }
     })
 }
