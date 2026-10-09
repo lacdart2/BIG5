@@ -3,12 +3,8 @@ import { DOMESTIC_LEAGUES, LEAGUES } from '../../types/league'
 import HorizontalScroller from '../ui/HorizontalScroller'
 import LeagueEmblem from '../ui/LeagueEmblem'
 import { STANDINGS_CODES } from '../../services/scheduleApi'
+import { useLocale } from '../../i18n/LocaleProvider'
 
-/**
- * LeagueTabs — horizontal scroll pills to filter by league.
- * Wrapped in HorizontalScroller so users get a fade hint when
- * tabs are cut off (e.g. Ligue 1 hidden at higher zoom levels).
- */
 function LeagueTabs({
     activeId,
     onChange,
@@ -20,11 +16,11 @@ function LeagueTabs({
     showAll?: boolean
     emblems?: Record<string, string | undefined>
 }) {
+    const { t, competitionName } = useLocale()
     const competitionTabs = showAll ? LEAGUES : DOMESTIC_LEAGUES
-    const tabs = showAll ? [{ id: 'all', name: 'All competitions', shortName: 'All' }, ...competitionTabs] : competitionTabs
+    const tabs = showAll ? [{ id: 'all', name: t('common.allCompetitions'), shortName: t('common.all') }, ...competitionTabs] : competitionTabs
     const activeTab = useRef<HTMLButtonElement>(null)
 
-    /** Keep a selection made by swiping visible without moving the page vertically. */
     useEffect(() => {
         const button = activeTab.current
         const scroller = button?.closest<HTMLElement>('[role="group"]')
@@ -40,23 +36,28 @@ function LeagueTabs({
     }, [activeId])
 
     return (
-        <HorizontalScroller role="group" ariaLabel="Filter by league" className="flex gap-2 px-4 py-3">
+        <HorizontalScroller role="group" ariaLabel={t('common.allCompetitions')} className="flex gap-2 px-4 py-3">
             {tabs.map((tab) => {
                 const isActive = tab.id === activeId
+                const label = tab.id === 'all' ? tab.name : competitionName(tab.name)
                 return (
                     <button
                         key={tab.id}
                         ref={isActive ? activeTab : undefined}
                         type="button"
                         aria-pressed={isActive}
-                        aria-label={tab.name}
-                        title={tab.name}
+                        aria-label={label}
+                        title={label}
                         onClick={() => onChange(tab.id)}
-                        className={`min-h-11 shrink-0 cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-text motion-reduce:transition-none
-              ${isActive ? 'bg-accent/15 text-accent-text hover:bg-accent/25 active:bg-accent/30' : 'bg-surface-2 text-text-2 hover:bg-surface-3 hover:text-text active:bg-accent/15 active:text-accent-text'}`}
+                        className={`min-h-11 shrink-0 cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-text motion-reduce:transition-none ${isActive ? 'bg-accent/15 text-accent-text hover:bg-accent/25 active:bg-accent/30' : 'bg-surface-2 text-text-2 hover:bg-surface-3 hover:text-text active:bg-accent/15 active:text-accent-text'}`}
                     >
                         <span className="flex items-center gap-2">
-                            {tab.id === 'all' ? 'All' : <LeagueEmblem code={STANDINGS_CODES[tab.id]} src={emblems?.[tab.id]} label={tab.shortName} />}
+                            {tab.id === 'all'
+                                ? t('common.all')
+                                : <>
+                                    <LeagueEmblem code={STANDINGS_CODES[tab.id]} src={emblems?.[tab.id]} label={tab.shortName} />
+                                    <span>{label}</span>
+                                </>}
                         </span>
                     </button>
                 )
