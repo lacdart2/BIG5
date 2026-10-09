@@ -6,6 +6,7 @@ import Live from './pages/Live'
 import Standings from './pages/Standings'
 import Favorites from './pages/Favorites'
 import MatchDetails from './pages/MatchDetails'
+import TeamDetails from './pages/TeamDetails'
 import { LocaleProvider } from './i18n/LocaleProvider'
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
             <Route path="standings" element={<Standings />} />
             <Route path="favorites" element={<Favorites />} />
             <Route path="match/:matchId" element={<MatchDetails />} />
+            <Route path="team/:teamId" element={<TeamDetails />} />
           </Route>
         </Routes>
       </BrowserRouter>
