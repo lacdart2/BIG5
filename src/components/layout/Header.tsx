@@ -5,10 +5,10 @@ import { useLocale } from '../../i18n/LocaleProvider'
 
 const NAV_LINKS = [
     { to: '/', key: 'nav.today', end: true },
-    { to: '/week', key: 'nav.week' },
-    { to: '/live', key: 'nav.live' },
-    { to: '/standings', key: 'nav.standings' },
-    { to: '/favorites', key: 'nav.favorites' },
+    { to: '/week', key: 'nav.week', end: false },
+    { to: '/live', key: 'nav.live', end: false },
+    { to: '/standings', key: 'nav.standings', end: false },
+    { to: '/favorites', key: 'nav.favorites', end: false },
 ] as const
 
 function Header() {
