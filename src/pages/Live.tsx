@@ -86,7 +86,7 @@ function Live() {
                             <p className="text-[11px] font-bold uppercase tracking-widest text-accent-text">{t('live.between')}</p>
                             <h2 className="mt-2 text-balance font-display text-2xl font-extrabold tracking-tight">{t('live.none')}</h2>
                             <p className="mt-3 max-w-80 text-sm leading-relaxed text-text-2">
-                                {selectedLeague ? `No ${selectedLeague.name} matches are in play. Check another league or see the next kickoffs.` : 'The next kickoff is worth the wait. Explore today’s fixtures or plan your football week.'}
+                                {selectedLeague ? t('live.noneLeague', { league: competitionName(selectedLeague.name) }) : t('live.noneAll')}
                             </p>
                             <div className="mt-5 flex flex-wrap gap-3">
                                 <Link to="/" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-accent/15 px-4 text-sm font-semibold text-accent-text hover:bg-accent/25 focus-visible:outline-2 focus-visible:outline-accent-text">{t('live.todayFixtures')} <ArrowUpRight size={16} aria-hidden="true" /></Link>
