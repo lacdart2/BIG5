@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, MapPin, Star, Trophy, UserRound } from 'lucide-react'
+import { ArrowLeft, MapPin, Trophy, UserRound } from 'lucide-react'
 import LeagueEmblem from '../components/ui/LeagueEmblem'
 import ScheduleLoading from '../components/ui/ScheduleLoading'
 import TeamCrest from '../components/ui/TeamCrest'
 import LiveIndicator from '../components/ui/LiveIndicator'
 import { fetchMatchDetails, scheduleErrorMessage } from '../services/scheduleApi'
-import { useFavoriteMatches } from '../hooks/useFavoriteMatches'
 import { useLocale } from '../i18n/LocaleProvider'
 import type { MatchDetails } from '../types/football'
 
@@ -15,7 +14,6 @@ function MatchDetailsPage() {
     const [match, setMatch] = useState<MatchDetails | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-    const { isFavorite, toggleFavorite } = useFavoriteMatches()
     const { t, competitionName, dateLocale, isRTL } = useLocale()
 
     useEffect(() => {
@@ -58,7 +56,6 @@ function MatchDetailsPage() {
         )
     }
 
-    const favorite = isFavorite(match.id)
     const kickoff = new Date(match.kickoff)
     const dateLabel = kickoff.toLocaleDateString(dateLocale, {
         weekday: 'long',
@@ -82,15 +79,6 @@ function MatchDetailsPage() {
                     {t('matchDetails.back')}
                 </Link>
 
-                <button
-                    type="button"
-                    onClick={() => toggleFavorite(match)}
-                    aria-pressed={favorite}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-surface-1 px-4 text-sm font-semibold text-text transition-colors hover:bg-surface-2"
-                >
-                    <Star size={17} className={favorite ? 'fill-accent text-accent' : 'text-text-2'} />
-                    {favorite ? t('matchDetails.saved') : t('matchDetails.save')}
-                </button>
             </div>
 
             <section className="overflow-hidden rounded-3xl border border-accent/25 bg-surface-1">
