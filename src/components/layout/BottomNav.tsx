@@ -4,10 +4,10 @@ import { useLocale } from '../../i18n/LocaleProvider'
 
 const NAV_ITEMS = [
     { to: '/', key: 'nav.today', icon: Calendar, end: true },
-    { to: '/week', key: 'nav.week', icon: CalendarDays },
-    { to: '/live', key: 'nav.live', icon: Radio },
-    { to: '/standings', key: 'nav.standings', icon: Trophy },
-    { to: '/favorites', key: 'nav.favorites', icon: Star },
+    { to: '/week', key: 'nav.week', icon: CalendarDays, end: false },
+    { to: '/live', key: 'nav.live', icon: Radio, end: false },
+    { to: '/standings', key: 'nav.standings', icon: Trophy, end: false },
+    { to: '/favorites', key: 'nav.favorites', icon: Star, end: false },
 ] as const
 
 function BottomNav() {
