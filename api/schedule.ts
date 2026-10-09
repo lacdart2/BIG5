@@ -1,3 +1,4 @@
+/// <reference types="node" />
 export default async function handler(req: any, res: any) {
     const { endpoint, ...queryParams } = req.query
 
@@ -23,7 +24,7 @@ export default async function handler(req: any, res: any) {
             if (value) res.setHeader(header, value)
         }
         res.status(apiResponse.status).json(data)
-    } catch (err) {
+    } catch {
         res.status(500).json({ error: 'Upstream request failed' })
     }
 }
