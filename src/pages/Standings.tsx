@@ -100,7 +100,7 @@ function Standings() {
         <div className="mx-auto w-full max-w-xl space-y-6 bg-bg p-4">
             <header className="today-hero -mx-4 -mt-4 space-y-2 border-b border-border px-4 py-6">
                 <p className="text-xs font-semibold uppercase tracking-widest text-accent-text">
-                    The season in numbers
+                    {t('standings.kicker')}
                 </p>
                 <h1 className="font-display text-3xl font-extrabold tracking-tight text-text">
                     {t('standings.title')}<span className="text-accent">.</span>
