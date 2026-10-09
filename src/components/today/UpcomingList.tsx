@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import TeamCrest from '../ui/TeamCrest'
 import LiveIndicator from '../ui/LiveIndicator'
 import { useLocale } from '../../i18n/LocaleProvider'
@@ -47,7 +48,8 @@ function UpcomingList({
 
                         <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface-1">
                             {visibleFixtures.map((match) => (
-                                <li key={match.id} className="flex items-center gap-3 px-4 py-4 transition-colors duration-150 hover:bg-surface-2 motion-reduce:transition-none">
+                                <li key={match.id}>
+                                    <Link to={`/match/${match.id}`} className="flex items-center gap-3 px-4 py-4 transition-colors duration-150 hover:bg-surface-2 motion-reduce:transition-none">
                                     <div className="w-16 shrink-0 text-center text-xs font-semibold tabular-nums text-text-2" dir="ltr">
                                         {status === 'upcoming' ? (
                                             <time dateTime={match.kickoff}>
@@ -72,6 +74,7 @@ function UpcomingList({
                                             </div>
                                         ))}
                                     </div>
+                                    </Link>
                                 </li>
                             ))}
                         </ul>
