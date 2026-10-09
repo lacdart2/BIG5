@@ -243,7 +243,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     setLocale: setLocaleState,
     toggleLocale: () => setLocaleState((current) => current === 'ar' ? 'en' : 'ar'),
     t: (key, variables = {}) => {
-      let value = translations[locale][key] ?? translations.en[key] ?? key
+      let value: string = translations[locale][key] ?? translations.en[key] ?? key
       for (const [name, replacement] of Object.entries(variables)) {
         value = value.replace(`{${name}}`, String(replacement))
       }
