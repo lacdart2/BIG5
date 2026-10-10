@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import TeamCrest from '../ui/TeamCrest'
 import LiveIndicator from '../ui/LiveIndicator'
+import BroadcastInfo from '../ui/BroadcastInfo'
 import { useLocale } from '../../i18n/LocaleProvider'
 import type { Match } from '../../types/football'
 
@@ -61,7 +62,10 @@ function UpcomingList({
                                     </div>
 
                                     <div className="min-w-0 flex-1 border-s border-border ps-3">
-                                        <p className="mb-2 truncate text-[11px] text-text-2">{competitionName(match.competition)}</p>
+                                        <div className="mb-2 flex min-w-0 items-center justify-between gap-2">
+                                            <p className="min-w-0 truncate text-[11px] text-text-2">{competitionName(match.competition)}</p>
+                                            <BroadcastInfo match={match} />
+                                        </div>
                                         {[match.homeTeam, match.awayTeam].map((team, index) => (
                                             <div key={`${team.id}-${index}`} className="flex min-h-8 items-center gap-2">
                                                 <TeamCrest team={team} size={22} />

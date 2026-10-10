@@ -5,6 +5,7 @@ import LeagueEmblem from '../components/ui/LeagueEmblem'
 import ScheduleLoading from '../components/ui/ScheduleLoading'
 import TeamCrest from '../components/ui/TeamCrest'
 import LiveIndicator from '../components/ui/LiveIndicator'
+import BroadcastInfo from '../components/ui/BroadcastInfo'
 import { fetchMatchDetails, scheduleErrorMessage } from '../services/scheduleApi'
 import { useLocale } from '../i18n/LocaleProvider'
 import type { MatchDetails } from '../types/football'
@@ -139,6 +140,8 @@ function MatchDetailsPage() {
                     <p className="mt-7 text-center text-sm text-text-2">{dateLabel}</p>
                 </div>
             </section>
+
+            <BroadcastInfo match={match} variant="panel" />
 
             <section className="rounded-2xl border border-border bg-surface-1 p-5">
                 <h2 className="font-display text-lg font-bold">{t('matchDetails.info')}</h2>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import TeamCrest from '../ui/TeamCrest'
 import LiveIndicator from '../ui/LiveIndicator'
 import LeagueEmblem from '../ui/LeagueEmblem'
+import BroadcastInfo from '../ui/BroadcastInfo'
 import { useLocale } from '../../i18n/LocaleProvider'
 import type { Match } from '../../types/football'
 
@@ -67,6 +68,11 @@ function FeaturedMatch({ match, variant = 'hero' }: FeaturedMatchProps) {
                         <TeamHeading dir="ltr" className="w-full break-words font-display text-sm font-bold text-text">{match.awayTeam.shortName}</TeamHeading>
                     </div>
                 </div>
+                {!compact && (
+                    <div className="mt-5 flex justify-center">
+                        <BroadcastInfo match={match} />
+                    </div>
+                )}
             </div>
 
             {live && !compact && <p className="border-t border-border px-4 py-2 text-center text-[11px] text-text-2">{t('featured.scoresDelayed')}</p>}
