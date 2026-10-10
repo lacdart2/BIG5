@@ -146,7 +146,7 @@ function Today() {
                         </div>
                     )}
                 </div>
-                <div className="lg:grid lg:grid-cols-[1.1fr_1fr_0.8fr] lg:gap-5">
+                <div className="space-y-6 lg:grid lg:grid-cols-[1.1fr_1fr_0.8fr] lg:gap-5 lg:space-y-0">
                     <StandingsPreview emblems={emblems} />
                     <WeekPreview matches={weekMatches} loading={isLoading} error={error} emblems={emblems} />
                     <PromoPanel />
