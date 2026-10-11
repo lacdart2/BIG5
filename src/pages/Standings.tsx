@@ -61,12 +61,18 @@ function Standings() {
         if (event.touches.length !== 1 || !(event.target instanceof Element)) return
         if (event.target.closest('button, a')) return
         const scrollRegion = event.target.closest<HTMLElement>('[data-standings-scroll]')
+
+        // Horizontal drags inside the standings table belong to the table only.
+        // Do not interpret them as league navigation; this also avoids fighting
+        // Android/browser back-swipe gestures at the screen edge.
+        if (scrollRegion) return
+
         const touch = event.touches[0]
         swipe.current = {
             x: touch.clientX,
             y: touch.clientY,
-            canGoNext: !scrollRegion || scrollRegion.scrollLeft + scrollRegion.clientWidth >= scrollRegion.scrollWidth - 2,
-            canGoPrevious: !scrollRegion || scrollRegion.scrollLeft <= 2,
+            canGoNext: true,
+            canGoPrevious: true,
         }
     }
 
