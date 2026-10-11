@@ -8,9 +8,11 @@ import Favorites from './pages/Favorites'
 import MatchDetails from './pages/MatchDetails'
 import TeamDetails from './pages/TeamDetails'
 import { LocaleProvider } from './i18n/LocaleProvider'
+import { ThemeProvider } from './theme/ThemeProvider'
 
 function App() {
   return (
+    <ThemeProvider>
     <LocaleProvider>
       <BrowserRouter>
         <Routes>
@@ -26,6 +28,7 @@ function App() {
         </Routes>
       </BrowserRouter>
     </LocaleProvider>
+  </ThemeProvider>
   )
 }
 
