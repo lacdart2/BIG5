@@ -31,7 +31,7 @@ function UpcomingList({
     const visibleGroups = groups.filter((group) => statuses.includes(group.status))
 
     return (
-        <div className="space-y-6">
+        <div className="w-full min-w-0 space-y-6">
             {visibleGroups.map(({ title, status }) => {
                 const fixtures = matches.filter((match) => match.status === status)
                 const isExpanded = expanded[status] ?? false
@@ -39,7 +39,7 @@ function UpcomingList({
                 if (!fixtures.length) return null
 
                 return (
-                    <section key={status} aria-label={title}>
+                    <section key={status} aria-label={title} className="w-full min-w-0">
                         <div className="mb-3 flex items-center justify-between">
                             <h2 className="font-display text-lg font-bold tracking-tight">{title}</h2>
                             <span className="text-xs tabular-nums text-text-2">
@@ -47,7 +47,7 @@ function UpcomingList({
                             </span>
                         </div>
 
-                        <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface-1">
+                        <ul className="w-full min-w-0 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface-1">
                             {visibleFixtures.map((match) => (
                                 <li key={match.id}>
                                     <Link to={`/match/${match.id}`} className="flex w-full min-w-0 items-center gap-3 overflow-hidden px-4 py-4 transition-colors duration-150 hover:bg-surface-2 motion-reduce:transition-none">
