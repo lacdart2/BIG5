@@ -1,7 +1,8 @@
 import { Link, NavLink } from 'react-router-dom'
-import { Languages } from 'lucide-react'
+import { Clock3, Languages, Moon, Sun } from 'lucide-react'
 import ShareButton from '../ui/ShareButton'
 import { useLocale } from '../../i18n/LocaleProvider'
+import { useTheme } from '../../theme/ThemeProvider'
 
 const NAV_LINKS = [
     { to: '/', key: 'nav.today', end: true },
@@ -13,6 +14,8 @@ const NAV_LINKS = [
 
 function Header() {
     const { locale, toggleLocale, t } = useLocale()
+    const { mode, resolvedTheme, cycleMode } = useTheme()
+    const ThemeIcon = mode === 'auto' ? Clock3 : resolvedTheme === 'light' ? Sun : Moon
 
     return (
         <header className="sticky top-0 z-40 border-b border-border bg-surface-1/95 backdrop-blur pt-[env(safe-area-inset-top)]">
@@ -51,6 +54,15 @@ function Header() {
                 </nav>
 
                 <div className="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={cycleMode}
+                        aria-label={mode === 'auto' ? t('theme.auto') : resolvedTheme === 'light' ? t('theme.light') : t('theme.dark')}
+                        title={mode === 'auto' ? t('theme.auto') : resolvedTheme === 'light' ? t('theme.light') : t('theme.dark')}
+                        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-surface-3 text-text transition hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-text"
+                    >
+                        <ThemeIcon size={16} aria-hidden="true" />
+                    </button>
                     <button
                         type="button"
                         onClick={toggleLocale}
