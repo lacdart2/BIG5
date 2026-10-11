@@ -69,7 +69,7 @@ function Today() {
     }
 
     return (
-        <div className="pb-4">
+        <div className="w-full min-w-0 overflow-x-hidden pb-4">
             <Hero />
             <div className="py-2 lg:flex lg:items-center lg:justify-between lg:gap-2">
                 <LeagueTabs activeId={activeLeagueId} onChange={setActiveLeagueId} emblems={emblems} />
@@ -79,10 +79,10 @@ function Today() {
                     <button type="button" aria-label={t('date.nextDay')} disabled={dayIndex === dates.length - 1} onClick={() => setDayIndex((previous) => previous + 1)} className={arrowClass}><ChevronRight size={18} aria-hidden="true" className={isRTL ? '-scale-x-100' : ''} /></button>
                 </div>
             </div>
-            <div className="space-y-6 px-4">
+            <div className="w-full min-w-0 space-y-6 px-4">
                 <StatsStrip date={selectedDate} matches={visibleMatches} pending={isLoading || !!error} />
                 <p role="status" aria-atomic="true" className="sr-only">{dateLabel}, {selectedLeague ? competitionName(selectedLeague.name) : t('common.allCompetitions')}: {isLoading ? 'loading fixtures' : error ? 'fixtures unavailable' : `${visibleMatches.length} matches`}</p>
-                <div aria-busy={isLoading} className="space-y-6">
+                <div aria-busy={isLoading} className="min-w-0 space-y-6">
                     {isLoading ? (
                         <div className="rounded-2xl border border-border bg-surface-1 p-5">
                             <ScheduleLoading>{t('today.loading')}</ScheduleLoading>
@@ -101,7 +101,7 @@ function Today() {
                     ) : featured ? (
                         <>
                             {/* Row 1: spotlight + other live matches */}
-                            <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr] lg:items-start lg:gap-5">
+                            <div className="grid min-w-0 gap-6 lg:grid-cols-[1.15fr_1fr] lg:items-start lg:gap-5">
                                 <FeaturedMatch
                                     key={featured.id}
                                     match={featured}
@@ -116,7 +116,7 @@ function Today() {
                             </div>
 
                             {/* Row 2: upcoming + finished */}
-                            <div className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-5">
+                            <div className="grid min-w-0 gap-6 lg:grid-cols-2 lg:items-start lg:gap-5">
                                 <UpcomingList
                                     matches={visibleMatches.filter(
                                         (match) => match.id !== featured.id
@@ -133,7 +133,7 @@ function Today() {
                             </div>
                         </>
                     ) : (
-                        <div className="grid gap-6 lg:grid-cols-2 lg:gap-5">
+                        <div className="grid min-w-0 gap-6 lg:grid-cols-2 lg:gap-5">
                             <UpcomingList
                                 matches={visibleMatches}
                                 statuses={['live', 'upcoming']}
@@ -146,7 +146,7 @@ function Today() {
                         </div>
                     )}
                 </div>
-                <div className="space-y-6 lg:grid lg:grid-cols-[1.1fr_1fr_0.8fr] lg:gap-5 lg:space-y-0">
+                <div className="min-w-0 space-y-6 lg:grid lg:grid-cols-[1.1fr_1fr_0.8fr] lg:gap-5 lg:space-y-0">
                     <StandingsPreview emblems={emblems} />
                     <WeekPreview matches={weekMatches} loading={isLoading} error={error} emblems={emblems} />
                     <PromoPanel />
