@@ -21,13 +21,13 @@ function StandingsTable({ rows, leagueName, compact = false }: { rows: Standing[
     return (
         <div>
             {!compact && <p className="px-4 py-3 text-xs text-text-2">{t('table.clubs', { count: rows.length })}</p>}
-            <div data-standings-scroll={!compact || undefined} role="region" aria-label={`${localizedLeague} standings table`} tabIndex={compact ? undefined : 0} className="overflow-x-auto focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-text">
-                <table className={`w-full table-fixed text-sm tabular-nums ${compact ? '' : 'min-w-[640px]'}`}>
+            <div data-standings-scroll={!compact || undefined} role="region" aria-label={`${localizedLeague} standings table`} tabIndex={compact ? undefined : 0} className="overscroll-x-contain [touch-action:pan-x_pan-y] overflow-x-auto focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-text">
+                <table className={`w-full table-fixed text-sm tabular-nums ${compact ? '' : 'min-w-[700px]'}`}>
                     <caption className="px-4 py-3 text-start text-xs font-semibold text-text-2">{localizedLeague} · {compact ? t('table.topFive') : t('table.leagueTable')}</caption>
                     <thead className="border-y border-border bg-surface-2 text-[10px] uppercase tracking-wider text-text-2">
                         <tr>
                             <th scope="col" aria-label="Position" className="w-10 py-2">#</th>
-                            <th scope="col" className="text-start">{t('table.club')}</th>
+                            <th scope="col" className="min-w-[180px] text-start">{t('table.club')}</th>
                             <th scope="col" aria-label="Played" className="w-10">P</th>
                             {!compact && <>
                                 <th scope="col" aria-label="Won" className="w-10">W</th>
