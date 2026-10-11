@@ -41,8 +41,8 @@ function UpcomingList({
                 return (
                     <section key={status} aria-label={title}>
                         <div className="mb-3 flex items-center justify-between">
-                            <h2 className="font-display text-xl font-bold tracking-tight">{title}</h2>
-                            <span className="text-sm tabular-nums text-text-2">
+                            <h2 className="font-display text-lg font-bold tracking-tight">{title}</h2>
+                            <span className="text-xs tabular-nums text-text-2">
                                 {fixtures.length} {fixtures.length === 1 ? t('common.match') : t('common.matches')}
                             </span>
                         </div>
@@ -50,8 +50,8 @@ function UpcomingList({
                         <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface-1">
                             {visibleFixtures.map((match) => (
                                 <li key={match.id}>
-                                    <Link to={`/match/${match.id}`} className="flex items-center gap-3 px-4 py-4.5 transition-colors duration-150 hover:bg-surface-2 motion-reduce:transition-none">
-                                    <div className="w-20 shrink-0 text-center font-display text-base font-extrabold tabular-nums text-text" dir="ltr">
+                                    <Link to={`/match/${match.id}`} className="flex w-full min-w-0 items-center gap-3 overflow-hidden px-4 py-4 transition-colors duration-150 hover:bg-surface-2 motion-reduce:transition-none">
+                                    <div className="w-[72px] shrink-0 text-center font-display text-base font-extrabold tabular-nums text-text" dir="ltr">
                                         {status === 'upcoming' ? (
                                             <time dateTime={match.kickoff}>
                                                 {new Date(match.kickoff).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -62,16 +62,16 @@ function UpcomingList({
                                     </div>
 
                                     <div className="min-w-0 flex-1 border-s border-border ps-3">
-                                        <div className="mb-2 flex min-w-0 items-center justify-between gap-2">
-                                            <p className="min-w-0 truncate text-sm font-medium text-text-2">{competitionName(match.competition)}</p>
+                                        <div className="mb-2 flex min-w-0 items-center justify-between gap-2 overflow-hidden">
+                                            <p className="min-w-0 truncate text-[11px] text-text-2">{competitionName(match.competition)}</p>
                                             <BroadcastInfo match={match} />
                                         </div>
                                         {[match.homeTeam, match.awayTeam].map((team, index) => (
                                             <div key={`${team.id}-${index}`} className="flex min-h-8 items-center gap-2">
                                                 <TeamCrest team={team} size={22} />
-                                                <span dir="ltr" className="min-w-0 flex-1 text-base font-semibold">{team.shortName}</span>
+                                                <span dir="ltr" className="min-w-0 flex-1 truncate text-sm font-medium">{team.shortName}</span>
                                                 {status !== 'upcoming' && (
-                                                    <span dir="ltr" className="font-display text-lg font-extrabold tabular-nums">
+                                                    <span dir="ltr" className="shrink-0 font-display text-base font-bold tabular-nums">
                                                         {(index === 0 ? match.homeScore : match.awayScore) ?? '—'}
                                                     </span>
                                                 )}
