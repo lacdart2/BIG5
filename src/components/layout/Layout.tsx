@@ -7,7 +7,7 @@ import PageMeta from './PageMeta'
 
 function Layout() {
     return (
-        <div className="flex min-h-dvh flex-col bg-bg">
+        <div className="flex min-h-dvh w-full min-w-0 flex-col overflow-x-hidden bg-bg">
             <PageMeta />
             <a
                 href="#main-content"
@@ -19,7 +19,7 @@ function Layout() {
             <main
                 id="main-content"
                 tabIndex={-1}
-                className="flex-1 pb-20 lg:mx-auto lg:w-full lg:max-w-[1220px] lg:pb-0"
+                className="w-full min-w-0 flex-1 overflow-x-hidden pb-20 lg:mx-auto lg:max-w-[1220px] lg:pb-0"
             >
                 <Outlet />
             </main>
