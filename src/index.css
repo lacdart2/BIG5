@@ -46,26 +46,27 @@
   html[data-theme="light"] {
     color-scheme: light;
 
-    --color-bg: #f5f7fb;
+    /* Light mode needs stronger surface separation than dark OLED mode. */
+    --color-bg: #edf1f6;
     --color-surface-1: #ffffff;
-    --color-surface-2: #f0f2f7;
-    --color-surface-3: #e7eaf1;
+    --color-surface-2: #f4f6f9;
+    --color-surface-3: #e7ebf2;
 
-    --color-border: #d8dce6;
-    --color-border-strong: #c3c9d6;
+    --color-border: #cfd6e1;
+    --color-border-strong: #b7c0cf;
 
-    --color-text: #11131a;
-    --color-text-2: #5f6673;
-    --color-text-3: #8a919d;
+    --color-text: #121722;
+    --color-text-2: #5b6573;
+    --color-text-3: #7c8796;
 
     --color-accent: #5457e8;
-    --color-accent-text: #4548d8;
+    --color-accent-text: #474ad7;
     --color-accent-hover: #6265f0;
 
-    --color-live: #c94b56;
+    --color-live: #bf5360;
     --color-form-w: #15803d;
     --color-form-d: #64748b;
-    --color-form-l: #c2414d;
+    --color-form-l: #b94753;
   }
 
   body {
@@ -93,8 +94,26 @@
 
   html[data-theme="light"] .today-hero {
     background:
-      radial-gradient(ellipse at 95% 0%, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent 62%),
-      radial-gradient(ellipse at 0% 0%, rgba(17, 19, 26, 0.04), transparent 42%),
-      var(--color-surface-1);
+      radial-gradient(ellipse at 95% 0%, color-mix(in srgb, var(--color-accent) 16%, transparent), transparent 58%),
+      radial-gradient(ellipse at 0% 0%, rgba(17, 23, 34, 0.055), transparent 44%),
+      linear-gradient(180deg, #ffffff 0%, #f8f9fc 100%);
+  }
+
+  /* Subtle elevation only in light mode: enough depth to scan, never glossy. */
+  html[data-theme="light"] .rounded-2xl.border,
+  html[data-theme="light"] .rounded-3xl.border {
+    box-shadow:
+      0 1px 2px rgba(17, 23, 34, 0.05),
+      0 8px 24px rgba(17, 23, 34, 0.045);
+  }
+
+  html[data-theme="light"] header,
+  html[data-theme="light"] nav.fixed,
+  html[data-theme="light"] footer {
+    box-shadow: 0 1px 0 rgba(17, 23, 34, 0.035);
+  }
+
+  html[data-theme="light"] .bg-surface-2 {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   }
 }
