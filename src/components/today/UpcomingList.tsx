@@ -69,7 +69,7 @@ function UpcomingList({
                                         {[match.homeTeam, match.awayTeam].map((team, index) => (
                                             <div key={`${team.id}-${index}`} className="flex min-h-8 items-center gap-2">
                                                 <TeamCrest team={team} size={22} />
-                                                <span dir="ltr" className="min-w-0 flex-1 truncate text-[15px] font-semibold">{team.shortName}</span>
+                                                <span dir="ltr" className="min-w-0 flex-1 truncate text-base font-bold">{team.shortName}</span>
                                                 {status !== 'upcoming' && (
                                                     <span dir="ltr" className="shrink-0 font-display text-base font-bold tabular-nums">
                                                         {(index === 0 ? match.homeScore : match.awayScore) ?? '—'}
