@@ -13,6 +13,7 @@ import { fetchWeekFixtures, scheduleErrorMessage } from '../services/scheduleApi
 import { LEAGUES } from '../types/league'
 import type { Match } from '../types/football'
 import { useLocale } from '../i18n/LocaleProvider'
+import { pickSpotlightMatch } from '../utils/matchPriority'
 
 /** Matchday home: one fixture response powers the selected day and week preview. */
 function Today() {
@@ -53,8 +54,7 @@ function Today() {
     const visibleMatches = weekMatches.filter((match) =>
         match.kickoff.slice(0, 10) === selectedDate && (!selectedLeague || match.leagueApiId === selectedLeague.apiId)
     ).sort((a, b) => a.kickoff.localeCompare(b.kickoff))
-    const featured = visibleMatches.find((match) => match.status === 'live')
-        ?? visibleMatches.find((match) => match.status === 'upcoming' && new Date(match.kickoff).getTime() >= loadedAt)
+    const featured = pickSpotlightMatch(visibleMatches, loadedAt)
     const emblems = Object.fromEntries(LEAGUES.map((league) => [
         league.id, matches.find((match) => match.leagueApiId === league.apiId && match.competitionEmblem)?.competitionEmblem,
     ]))
